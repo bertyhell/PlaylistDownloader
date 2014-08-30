@@ -40,3 +40,4 @@ C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\obj
 C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\obj\Debug\PlaylistDownloader.Properties.Resources.resources
 C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\obj\Debug\PlaylistDownloader.csproj.GenerateResource.Cache
 C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\bin\Debug\ffmpeg.exe
+C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\obj\Debug\PlaylistDownloader.csprojResolveAssemblyReference.cache

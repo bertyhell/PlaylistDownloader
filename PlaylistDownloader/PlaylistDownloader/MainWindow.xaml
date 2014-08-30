@@ -1,25 +1,58 @@
 ﻿<Window x:Class="PlaylistDownloader.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Playlist Downloader" Height="350" Width="525"
+        Title="Playlist Downloader" Height="382" Width="689"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:carViewer="clr-namespace:PlaylistDownloader"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance Type={x:Type carViewer:MainWindow}}" Icon="icon.ico">
+        d:DataContext="{d:DesignInstance Type={x:Type carViewer:MainWindow}}" Icon="icon.ico" Loaded="WindowLoaded">
 	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="367*"/>
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="20"/>
-			<RowDefinition Height="40"/>
-		</Grid.RowDefinitions>
-		<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" />
+		<Grid Visibility="{Binding EditPanelVisibility}">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="40"/>
+			</Grid.RowDefinitions>
 
-		<TextBox Margin="0 0 0 5" Text="{Binding PlayList}" Grid.Row="0" Grid.Column="0" IsManipulationEnabled="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" PreviewMouseDown="TextBoxMouseDown" />
+			<TextBox Margin="0 0 0 5" Text="{Binding PlayList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" IsManipulationEnabled="True"
+		HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" PreviewMouseDown="TextBoxMouseDown"
+					 x:Name="PlaylistTextBox"/>
 
-		<Button Grid.Row="2" Click="DownloadButtonClick" Grid.Column="0">Download Songs</Button>
+			<Button Grid.Row="1" Click="DownloadButtonClick" Grid.Column="0" >Download</Button>
+		</Grid>
+		<Grid Visibility="{Binding ProgressPanelVisibility}">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="20"/>
+				<RowDefinition Height="40"/>
+			</Grid.RowDefinitions>
+			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" />
+
+			<DataGrid Margin="0 0 0 5" ItemsSource="{Binding PlayListItems}" Grid.Row="0" Grid.Column="0" AlternatingRowBackground="#f8f8f8"
+			CanUserSortColumns="true" GridLinesVisibility="None" SelectionMode="Single"
+			IsReadOnly="True" CanUserResizeRows="False" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Song" Binding="{Binding Name}" Width="500" />
+					<DataGridTemplateColumn Header="Download" >
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<ProgressBar Value="{Binding DownloadProgress}" Width="Auto"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					<DataGridTemplateColumn Header="Conversion" >
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<ProgressBar Value="{Binding ConvertProgress}" Width="Auto"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" />
+
+			<Button Grid.Row="2" Click="AbortButtonClick" Grid.Column="0">Abort</Button>
+		</Grid>
 	</Grid>
 </Window>

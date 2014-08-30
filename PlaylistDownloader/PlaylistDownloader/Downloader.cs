@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Web;
+using System.Threading;
 using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
 
@@ -15,9 +15,9 @@ namespace PlaylistDownloader
 	{
 		const string URL = "http://www.youtube.com/results?search_query={0}";
 
-		private readonly List<string> _playlist;
+		private readonly ICollection<PlaylistItem> _playlist;
 
-		public Downloader(List<string> playlist)
+		public Downloader(ICollection<PlaylistItem> playlist)
 		{
 			_playlist = playlist;
 		}
@@ -25,27 +25,38 @@ namespace PlaylistDownloader
 		protected override void OnDoWork(DoWorkEventArgs e)
 		{
 			int totalSongs = _playlist.Count;
-			for (int i = 0; i < _playlist.Count; i++)
+			int progress = 0;
+
+			foreach (PlaylistItem item in _playlist)
 			{
-				string song = _playlist[i];
-				string requestUrl = string.Format(URL, System.Uri.EscapeDataString(song.Replace(" ", "+")));
+				if (!string.IsNullOrWhiteSpace(item.Name))
+				{
+					item.FileName = MakeValidFileName(item.Name);
+					if (!File.Exists("./songs/" + item.FileName + ".m4a") && !File.Exists("./songs/" + item.FileName + ".mp3"))
+					{
+						string requestUrl = string.Format(URL, System.Uri.EscapeDataString(item.Name.Replace(" ", "+")));
 
-				string youtubeLink = GetYoutubeLinks(GetWebPageCode(requestUrl))[0];
+						string youtubeLink = GetYoutubeLinks(GetWebPageCode(requestUrl))[0];
 
-				Process youtubeDownloadProcess = new Process
-												 {
-													 StartInfo =
-													 {
-														 FileName = "youtube-dl.exe",
-														 Arguments = " --extract-audio --audio-format mp3 -o ./songs/%(title)s.%(ext)s " + youtubeLink,
-														 CreateNoWindow = true,
-														 WindowStyle = ProcessWindowStyle.Hidden
-													 }
-												 };
-				youtubeDownloadProcess.Start();
-				youtubeDownloadProcess.WaitForExit();
+						Process youtubeDownloadProcess = new Process
+								 {
+									 StartInfo =
+									 {
+										 FileName = "youtube-dl.exe",
+										 Arguments =
+											 string.Format(" --extract-audio --audio-format mp3 -o \"./songs/{0}.%(ext)s\" {1}", item.FileName, youtubeLink),
+										 CreateNoWindow = true,
+										 WindowStyle = ProcessWindowStyle.Hidden
+									 }
+								 };
+						youtubeDownloadProcess.Start();
+						youtubeDownloadProcess.WaitForExit();
+					}
+				}
 
-				OnProgressChanged(new ProgressChangedEventArgs((i + 1) * 50 / totalSongs, null));
+				item.DownloadProgress = 100;
+				progress++;
+				OnProgressChanged(new ProgressChangedEventArgs((progress) * 50 / totalSongs, null));
 
 				if (CancellationPending)
 				{
@@ -54,27 +65,42 @@ namespace PlaylistDownloader
 			}
 
 			//convert m4a files to mp3
-			string[] musicFiles = Directory.GetFiles("./songs", "*.m4a");
-			for (int i = 0; i < musicFiles.Length; i++)
+			progress = 0;
+			foreach (PlaylistItem item in _playlist)
 			{
-				string file = musicFiles[i];
-				Process convertAudioProcess = new Process
+				string filePathWithoutExtension = Path.GetFullPath("./songs/" + item.FileName);
+				if (File.Exists(filePathWithoutExtension + ".m4a") && !File.Exists(filePathWithoutExtension + ".mp3"))
 				{
-					StartInfo =
+					Process convertAudioProcess = new Process
 					{
-						FileName = "ffmpeg.exe",
-						Arguments = string.Format("-i \"{0}\" \"{1}\"", file, Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file) + ".mp3")),
-						CreateNoWindow = true,
-						WindowStyle = ProcessWindowStyle.Hidden
-					}
-				};
-				convertAudioProcess.Start();
-				convertAudioProcess.WaitForExit();
+						StartInfo =
+						{
+							FileName = "ffmpeg.exe",
+							Arguments = string.Format("-i \"{0}\" \"{1}\"", filePathWithoutExtension + ".m4a", filePathWithoutExtension + ".mp3"),
+							CreateNoWindow = true,
+							WindowStyle = ProcessWindowStyle.Hidden
+						}
+					};
+					convertAudioProcess.Start();
+					convertAudioProcess.WaitForExit();
 
-				//delete m4a files
-				File.Delete(file);
+					Thread.Sleep(50);
+				}
 
-				OnProgressChanged(new ProgressChangedEventArgs(50 + (i + 1) * 50 / totalSongs, null));
+				if (File.Exists(filePathWithoutExtension + ".m4a") && File.Exists(filePathWithoutExtension + ".mp3"))
+				{
+					//delete m4a files
+					File.Delete(filePathWithoutExtension + ".m4a");
+				}
+
+				item.ConvertProgress = 100;
+				progress++;
+				OnProgressChanged(new ProgressChangedEventArgs(50 + progress * 50 / totalSongs, null));
+
+				if (CancellationPending)
+				{
+					return;
+				}
 			}
 		}
 
@@ -108,6 +134,13 @@ namespace PlaylistDownloader
 				return data;
 			}
 			return null;
+		}
+		private static string MakeValidFileName(string name)
+		{
+			string invalidChars = System.Text.RegularExpressions.Regex.Escape(new string(System.IO.Path.GetInvalidFileNameChars()));
+			string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
+
+			return System.Text.RegularExpressions.Regex.Replace(name, invalidRegStr, "_");
 		}
 	}
 }
