@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -6,6 +7,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Windows.Media;
 using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
 
@@ -16,6 +20,7 @@ namespace PlaylistDownloader
 		const string URL = "http://www.youtube.com/results?search_query={0}";
 
 		private readonly ICollection<PlaylistItem> _playlist;
+		private const int MAX_TRIES = 125;//5 seconds
 
 		public Downloader(ICollection<PlaylistItem> playlist)
 		{
@@ -27,84 +32,115 @@ namespace PlaylistDownloader
 			int totalSongs = _playlist.Count;
 			int progress = 0;
 
-			foreach (PlaylistItem item in _playlist)
-			{
-				if (!string.IsNullOrWhiteSpace(item.Name))
+			Parallel.ForEach(_playlist, item =>
 				{
-					item.FileName = MakeValidFileName(item.Name);
-					if (!File.Exists("./songs/" + item.FileName + ".m4a") && !File.Exists("./songs/" + item.FileName + ".mp3"))
+					if (!string.IsNullOrWhiteSpace(item.Name))
 					{
-						string requestUrl = string.Format(URL, System.Uri.EscapeDataString(item.Name.Replace(" ", "+")));
-
-						string youtubeLink = GetYoutubeLinks(GetWebPageCode(requestUrl))[0];
-
-						Process youtubeDownloadProcess = new Process
-								 {
-									 StartInfo =
-									 {
-										 FileName = "youtube-dl.exe",
-										 Arguments =
-											 string.Format(" --extract-audio --audio-format mp3 -o \"./songs/{0}.%(ext)s\" {1}", item.FileName, youtubeLink),
-										 CreateNoWindow = true,
-										 WindowStyle = ProcessWindowStyle.Hidden
-									 }
-								 };
-						youtubeDownloadProcess.Start();
-						youtubeDownloadProcess.WaitForExit();
-					}
-				}
-
-				item.DownloadProgress = 100;
-				progress++;
-				OnProgressChanged(new ProgressChangedEventArgs((progress) * 50 / totalSongs, null));
-
-				if (CancellationPending)
-				{
-					return;
-				}
-			}
-
-			//convert m4a files to mp3
-			progress = 0;
-			foreach (PlaylistItem item in _playlist)
-			{
-				string filePathWithoutExtension = Path.GetFullPath("./songs/" + item.FileName);
-				if (File.Exists(filePathWithoutExtension + ".m4a") && !File.Exists(filePathWithoutExtension + ".mp3"))
-				{
-					Process convertAudioProcess = new Process
-					{
-						StartInfo =
+						item.FileName = MakeValidFileName(item.Name);
+						if (!File.Exists("./songs/" + item.FileName + ".m4a") &&
+							!File.Exists("./songs/" + item.FileName + ".mp3"))
 						{
-							FileName = "ffmpeg.exe",
-							Arguments = string.Format("-i \"{0}\" \"{1}\"", filePathWithoutExtension + ".m4a", filePathWithoutExtension + ".mp3"),
-							CreateNoWindow = true,
-							WindowStyle = ProcessWindowStyle.Hidden
+							string requestUrl = string.Format(URL, HttpUtility.UrlEncode(item.Name).Replace("%20", "+"));
+
+							string youtubeLink = GetYoutubeLinks(GetWebPageCode(requestUrl)).FirstOrDefault();
+							if (youtubeLink == null)
+							{
+								item.SetDownloadStatus(false);
+							}
+							else
+							{
+								Process youtubeDownloadProcess = new Process
+								{
+									StartInfo =
+									{
+										FileName = "youtube-dl.exe",
+										Arguments =
+											string.Format(
+												" --extract-audio --audio-format mp3 -o \"./songs/{0}.%(ext)s\" {1}",
+												item.FileName, youtubeLink),
+										CreateNoWindow = true,
+										WindowStyle = ProcessWindowStyle.Hidden
+									}
+								};
+								youtubeDownloadProcess.Start();
+								youtubeDownloadProcess.WaitForExit();
+								Thread.Sleep(1000);
+							}
+
 						}
-					};
-					convertAudioProcess.Start();
-					convertAudioProcess.WaitForExit();
+					}
 
-					Thread.Sleep(50);
-				}
+					item.DownloadProgress = 100;
+					progress++;
+					OnProgressChanged(new ProgressChangedEventArgs(progress * 100 / (totalSongs * 2), null));
 
-				if (File.Exists(filePathWithoutExtension + ".m4a") && File.Exists(filePathWithoutExtension + ".mp3"))
-				{
-					//delete m4a files
-					File.Delete(filePathWithoutExtension + ".m4a");
-				}
+					if (CancellationPending)
+					{
+						return;
+					}
+					//convert m4a files to mp3
+					string filePathWithoutExtension = Path.GetFullPath("./songs/" + item.FileName);
+					// ReSharper disable once InconsistentNaming
+					string m4aFilePath = filePathWithoutExtension + ".m4a";
+					string mp3FilePath = filePathWithoutExtension + ".mp3";
 
-				item.ConvertProgress = 100;
-				progress++;
-				OnProgressChanged(new ProgressChangedEventArgs(50 + progress * 50 / totalSongs, null));
+					if (!File.Exists(m4aFilePath) &&
+						!File.Exists(mp3FilePath))
+					{
+						item.SetConvertStatus(false);
+					}
+					else
+					{
 
-				if (CancellationPending)
-				{
-					return;
-				}
-			}
+						if (File.Exists(m4aFilePath) &&
+							!File.Exists(mp3FilePath))
+						{
+							Process convertAudioProcess = new Process
+														  {
+															  StartInfo =
+															  {
+																  FileName = "ffmpeg.exe",
+																  Arguments =
+																	  string.Format("-i \"{0}\" \"{1}\"",
+																		  m4aFilePath,
+																		  mp3FilePath),
+																  CreateNoWindow = true,
+																  WindowStyle = ProcessWindowStyle.Hidden
+															  }
+														  };
+							convertAudioProcess.Start();
+							convertAudioProcess.WaitForExit();
+
+							Thread.Sleep(50);
+						}
+
+						if (File.Exists(m4aFilePath) &&
+							File.Exists(mp3FilePath))
+						{
+							//delete m4a files
+							int numberOfTries = 0;
+							while (numberOfTries < MAX_TRIES && File.Exists(m4aFilePath))
+							{
+								try
+								{
+									File.Delete(m4aFilePath);
+								}
+								catch (IOException)
+								{
+									Thread.Sleep(40);
+								}
+								numberOfTries++;
+							}
+						}
+					}
+
+					item.ConvertProgress = 100;
+					progress++;
+					OnProgressChanged(new ProgressChangedEventArgs(progress * 100 / (totalSongs * 2), null));
+				});
 		}
 
-		private string[] GetYoutubeLinks(string htmlCode)
+		private IEnumerable<string> GetYoutubeLinks(string htmlCode)
 		{
 			HtmlDocument doc = new HtmlDocument();
 			doc.LoadHtml(htmlCode);

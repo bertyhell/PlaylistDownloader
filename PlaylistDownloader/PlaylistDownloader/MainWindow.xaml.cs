@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using PlaylistDownloader.Annotations;
 
@@ -18,10 +15,12 @@ namespace PlaylistDownloader
 		private string _playList;
 		private bool _isIndeterminate;
 		private Downloader _downloader;
-		private string _actionButtonLabel;
 		private bool _isEditPanelVisible;
+		private string _abortButtonLabel;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
-		private const string ACTION_LABEL = "Download";
+		private const string ABORT_LABEL = "Abort";
+		private const string BACK_LABEL = "Back";
+
 
 		public MainWindow()
 		{
@@ -30,7 +29,7 @@ namespace PlaylistDownloader
 			DataContext = this;
 
 			PlayList = INSTRUCTIONS;
-			ActionButtonLabel = ACTION_LABEL;
+			AbortButtonLabel = ABORT_LABEL;
 			IsIndeterminate = false;
 			IsEditPanelVisible = true;
 
@@ -71,14 +70,14 @@ namespace PlaylistDownloader
 			}
 		}
 
-		public string ActionButtonLabel
+		public string AbortButtonLabel
 		{
-			get { return _actionButtonLabel; }
+			get { return _abortButtonLabel; }
 			set
 			{
-				if (value == _actionButtonLabel) return;
-				_actionButtonLabel = value;
-				OnPropertyChanged("ActionButtonLabel");
+				if (value == _abortButtonLabel) return;
+				_abortButtonLabel = value;
+				OnPropertyChanged("AbortButtonLabel");
 			}
 		}
 
@@ -119,7 +118,7 @@ namespace PlaylistDownloader
 			IsIndeterminate = true;
 
 			PlayListItems.Clear();
-			PlayList.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s.Trim())).ToList().ForEach(s => PlayListItems.Add(new PlaylistItem { Name = s }));
+			PlayList.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s.Trim())).ToList().ForEach(s => PlayListItems.Add(new PlaylistItem(this) { Name = s }));
 
 			_downloader = new Downloader(PlayListItems)
 						  {
@@ -129,7 +128,6 @@ namespace PlaylistDownloader
 
 			_downloader.ProgressChanged += DownloaderProgressChanged;
 			_downloader.RunWorkerCompleted += DownloaderRunWorkerCompleted;
-			//ActionButtonLabel = "Abort";
 
 
 			_downloader.RunWorkerAsync();
@@ -137,9 +135,8 @@ namespace PlaylistDownloader
 
 		void DownloaderRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			IsEditPanelVisible = true;
-			//TODO 030 on complete show message
 			//TODO 070 wait for cancel to complete before re-enabling download button
+			AbortButtonLabel = BACK_LABEL;
 		}
 
 		private void DownloaderProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -165,11 +162,18 @@ namespace PlaylistDownloader
 
 		private void AbortButtonClick(object sender, RoutedEventArgs e)
 		{
-			//ActionButtonLabel = "Aborting...";
-			_downloader.CancelAsync();
-			_downloader = null;
-			ProgressValue = 0;
-			IsEditPanelVisible = true;
+			if (AbortButtonLabel == ABORT_LABEL)
+			{
+				_downloader.CancelAsync();
+				_downloader = null;
+				ProgressValue = 0;
+				IsEditPanelVisible = true;
+			}
+			else
+			{
+				IsEditPanelVisible = true;
+				AbortButtonLabel = ABORT_LABEL;
+			}
 		}
 
 		private void WindowLoaded(object sender, RoutedEventArgs e)

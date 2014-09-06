@@ -36,14 +36,14 @@
 					<DataGridTemplateColumn Header="Download" >
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<ProgressBar Value="{Binding DownloadProgress}" Width="Auto"/>
+								<ProgressBar Value="{Binding DownloadProgress}" Width="Auto" Foreground="{Binding DownloadStatusColor}"/>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
 					<DataGridTemplateColumn Header="Conversion" >
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<ProgressBar Value="{Binding ConvertProgress}" Width="Auto"/>
+								<ProgressBar Value="{Binding ConvertProgress}" Width="Auto"  Foreground="{Binding ConvertStatusColor}"/>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
@@ -52,7 +52,7 @@
 
 			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" />
 
-			<Button Grid.Row="2" Click="AbortButtonClick" Grid.Column="0">Abort</Button>
+			<Button Grid.Row="2" Click="AbortButtonClick" Grid.Column="0" Content="{Binding AbortButtonLabel}"></Button>
 		</Grid>
 	</Grid>
 </Window>
