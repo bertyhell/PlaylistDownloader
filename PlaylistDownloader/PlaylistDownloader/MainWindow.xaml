@@ -9,16 +9,30 @@
         d:DataContext="{d:DesignInstance Type={x:Type carViewer:MainWindow}}" Icon="icon.ico" Loaded="WindowLoaded">
 	<Grid>
 		<Grid Visibility="{Binding EditPanelVisibility}">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="204*"/>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="120*"/>
+				<ColumnDefinition Width="150"/>
+			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
-				<RowDefinition Height="*"/>
+				<RowDefinition Height="40"/>
+				<RowDefinition Height="11*"/>
 				<RowDefinition Height="40"/>
 			</Grid.RowDefinitions>
 
-			<TextBox Margin="0 0 0 5" Text="{Binding PlayList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" IsManipulationEnabled="True"
-		HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" PreviewMouseDown="TextBoxMouseDown"
-					 x:Name="PlaylistTextBox"/>
+			<Label VerticalAlignment="Center">Search:</Label>
+			<TextBox VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="{Binding Query}"></TextBox>
+			<Label VerticalAlignment="Center" Grid.Row="0" Grid.Column="2">Number of results:</Label>
+			<TextBox VerticalAlignment="Center" Grid.Row="0" Grid.Column="3" Text="{Binding NumberOfResults}"></TextBox>
+			<Button Grid.Row="0" Grid.Column="4" Click="ButtonSearchClick">Search</Button>
 
-			<Button Grid.Row="1" Click="DownloadButtonClick" Grid.Column="0" >Download</Button>
+			<TextBox Margin="0 0 0 5" Text="{Binding PlayList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="0" IsManipulationEnabled="True"
+		HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" PreviewMouseDown="TextBoxMouseDown"
+					 x:Name="PlaylistTextBox" Grid.ColumnSpan="5"/>
+
+			<Button Grid.Row="2" Click="DownloadButtonClick" Grid.Column="0" Grid.ColumnSpan="5" >Download</Button>
 		</Grid>
 		<Grid Visibility="{Binding ProgressPanelVisibility}">
 			<Grid.RowDefinitions>

@@ -17,7 +17,6 @@ namespace PlaylistDownloader
 {
 	public class Downloader : BackgroundWorker
 	{
-		const string URL = "http://www.youtube.com/results?search_query={0}";
 
 		private readonly ICollection<PlaylistItem> _playlist;
 		private const int MAX_TRIES = 125;//5 seconds
@@ -40,9 +39,7 @@ namespace PlaylistDownloader
 						if (!File.Exists("./songs/" + item.FileName + ".m4a") &&
 							!File.Exists("./songs/" + item.FileName + ".mp3"))
 						{
-							string requestUrl = string.Format(URL, HttpUtility.UrlEncode(item.Name).Replace("%20", "+"));
-
-							string youtubeLink = GetYoutubeLinks(GetWebPageCode(requestUrl)).FirstOrDefault();
+							YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
 							if (youtubeLink == null)
 							{
 								item.SetDownloadStatus(false);
@@ -57,7 +54,7 @@ namespace PlaylistDownloader
 										Arguments =
 											string.Format(
 												" --extract-audio --audio-format mp3 -o \"./songs/{0}.%(ext)s\" {1}",
-												item.FileName, youtubeLink),
+												item.FileName, youtubeLink.Url),
 										CreateNoWindow = true,
 										WindowStyle = ProcessWindowStyle.Hidden
 									}
@@ -138,38 +135,6 @@ namespace PlaylistDownloader
 					progress++;
 					OnProgressChanged(new ProgressChangedEventArgs(progress * 100 / (totalSongs * 2), null));
 				});
-		}
-
-		private IEnumerable<string> GetYoutubeLinks(string htmlCode)
-		{
-			HtmlDocument doc = new HtmlDocument();
-			doc.LoadHtml(htmlCode);
-			IEnumerable<HtmlNode> nodes = doc.DocumentNode.QuerySelectorAll("#results h3 > a");
-			return nodes.Select(n => "http://www.youtube.com" + n.Attributes["href"].Value).ToArray();
-		}
-
-		private string GetWebPageCode(string url)
-		{
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-			if (response.StatusCode == HttpStatusCode.OK)
-			{
-				Stream receiveStream = response.GetResponseStream();
-				StreamReader readStream = null;
-				if (response.CharacterSet == null)
-				{
-					readStream = new StreamReader(receiveStream);
-				}
-				else
-				{
-					readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-				}
-				string data = readStream.ReadToEnd();
-				response.Close();
-				readStream.Close();
-				return data;
-			}
-			return null;
 		}
 		private static string MakeValidFileName(string name)
 		{

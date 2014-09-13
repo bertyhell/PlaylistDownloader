@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -6,17 +7,18 @@ using PlaylistDownloader.Annotations;
 
 namespace PlaylistDownloader
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
+		//TODO disable buttons when no valid input is given for search by artist, number of pages and playlist
+
 		private int _progressValue;
 		private string _playList;
 		private bool _isIndeterminate;
 		private Downloader _downloader;
 		private bool _isEditPanelVisible;
 		private string _abortButtonLabel;
+		private string _query;
+		private string _numberOfResults;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
 		private const string ABORT_LABEL = "Abort";
 		private const string BACK_LABEL = "Back";
@@ -32,9 +34,9 @@ namespace PlaylistDownloader
 			AbortButtonLabel = ABORT_LABEL;
 			IsIndeterminate = false;
 			IsEditPanelVisible = true;
+			NumberOfResults = "20";
 
 			PlayListItems = new ObservableCollection<PlaylistItem>();
-
 		}
 
 		public string PlayList
@@ -112,6 +114,28 @@ namespace PlaylistDownloader
 			}
 		}
 
+		public string Query
+		{
+			get { return _query; }
+			set
+			{
+				if (value == _query) return;
+				_query = value;
+				OnPropertyChanged("Query");
+			}
+		}
+
+		public string NumberOfResults
+		{
+			get { return _numberOfResults; }
+			set
+			{
+				if (value == _numberOfResults) return;
+				_numberOfResults = value;
+				OnPropertyChanged("NumberOfResults");
+			}
+		}
+
 		private void DownloadButtonClick(object sender, RoutedEventArgs e)
 		{
 			IsEditPanelVisible = false;
@@ -180,6 +204,27 @@ namespace PlaylistDownloader
 		{
 			PlaylistTextBox.Focus();
 			PlaylistTextBox.SelectAll();
+		}
+
+		private void ButtonSearchClick(object sender, RoutedEventArgs e)
+		{
+			if (string.IsNullOrWhiteSpace(Query))
+			{
+				MessageBox.Show("Query cannot be empty");
+				return;
+			}
+			int numberOfResults;
+			if (!int.TryParse(NumberOfResults, out numberOfResults) || numberOfResults < 1)
+			{
+				MessageBox.Show("Number of pages is not a valid number");
+			}
+
+			IEnumerable<YoutubeLink> youtubeLinks = YoutubeSearcher.GetYoutubeLinks(Query, numberOfResults);
+			if (PlayList == INSTRUCTIONS) PlayList = "";
+			foreach (YoutubeLink link in youtubeLinks)
+			{
+				PlayList += link.Label + "\n"; //TODO store urls of songs in cache => quicker to download, no need for lookup on youtube
+			}
 		}
 	}
 }
