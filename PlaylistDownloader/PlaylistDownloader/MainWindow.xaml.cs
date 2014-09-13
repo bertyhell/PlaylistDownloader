@@ -10,6 +10,8 @@ namespace PlaylistDownloader
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 		//TODO disable buttons when no valid input is given for search by artist, number of pages and playlist
+		//TODO show different icon for back button than for abort button
+		//TODO make icons grayscale when disabled
 
 		private int _progressValue;
 		private string _playList;

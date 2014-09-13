@@ -26,13 +26,23 @@
 			<TextBox VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="{Binding Query}"></TextBox>
 			<Label VerticalAlignment="Center" Grid.Row="0" Grid.Column="2">Number of results:</Label>
 			<TextBox VerticalAlignment="Center" Grid.Row="0" Grid.Column="3" Text="{Binding NumberOfResults}"></TextBox>
-			<Button Grid.Row="0" Grid.Column="4" Click="ButtonSearchClick">Search</Button>
+			<Button Grid.Row="0" Grid.Column="4" Click="ButtonSearchClick">
+				<StackPanel Orientation="Horizontal">
+					<Image Source="img/search.png" Width="26"></Image>
+					<Label>Search</Label>
+				</StackPanel>
+			</Button>
 
 			<TextBox Margin="0 0 0 5" Text="{Binding PlayList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="0" IsManipulationEnabled="True"
 		HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" PreviewMouseDown="TextBoxMouseDown"
 					 x:Name="PlaylistTextBox" Grid.ColumnSpan="5"/>
 
-			<Button Grid.Row="2" Click="DownloadButtonClick" Grid.Column="0" Grid.ColumnSpan="5" >Download</Button>
+			<Button Grid.Row="2" Click="DownloadButtonClick" Grid.Column="0" Grid.ColumnSpan="5" >
+				<StackPanel Orientation="Horizontal">
+					<Image Source="img/download.png" Width="26"></Image>
+					<Label>Download</Label>
+				</StackPanel>
+			</Button>
 		</Grid>
 		<Grid Visibility="{Binding ProgressPanelVisibility}">
 			<Grid.RowDefinitions>
@@ -66,7 +76,12 @@
 
 			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" />
 
-			<Button Grid.Row="2" Click="AbortButtonClick" Grid.Column="0" Content="{Binding AbortButtonLabel}"></Button>
+			<Button Grid.Row="2" Click="AbortButtonClick" Grid.Column="0" >
+				<StackPanel Orientation="Horizontal">
+					<Image Source="img/cancel.png" Width="26"></Image>
+					<Label Content="{Binding AbortButtonLabel}"></Label>
+				</StackPanel>
+			</Button>
 		</Grid>
 	</Grid>
 </Window>
