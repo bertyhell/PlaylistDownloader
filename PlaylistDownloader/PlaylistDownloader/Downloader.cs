@@ -33,6 +33,7 @@ namespace PlaylistDownloader
 
 			Parallel.ForEach(_playlist, item =>
 				{
+					item.DownloadProgress = 5;
 					if (!string.IsNullOrWhiteSpace(item.Name))
 					{
 						item.FileName = MakeValidFileName(item.Name);
@@ -40,6 +41,9 @@ namespace PlaylistDownloader
 							!File.Exists("./songs/" + item.FileName + ".mp3"))
 						{
 							YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
+
+							item.DownloadProgress = 50;
+
 							if (youtubeLink == null)
 							{
 								item.SetDownloadStatus(false);
@@ -81,6 +85,8 @@ namespace PlaylistDownloader
 					string m4aFilePath = filePathWithoutExtension + ".m4a";
 					string mp3FilePath = filePathWithoutExtension + ".mp3";
 
+					item.ConvertProgress = 5;
+
 					if (!File.Exists(m4aFilePath) &&
 						!File.Exists(mp3FilePath))
 					{
@@ -110,6 +116,8 @@ namespace PlaylistDownloader
 
 							Thread.Sleep(50);
 						}
+
+						item.ConvertProgress = 90;
 
 						if (File.Exists(m4aFilePath) &&
 							File.Exists(mp3FilePath))

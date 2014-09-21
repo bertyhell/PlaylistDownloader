@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using PlaylistDownloader.Annotations;
@@ -9,9 +10,13 @@ namespace PlaylistDownloader
 {
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
-		//TODO disable buttons when no valid input is given for search by artist, number of pages and playlist
 		//TODO show different icon for back button than for abort button
-		//TODO make icons grayscale when disabled
+
+		//TODO add max duration setting for songs
+		//TODO show more detailed progress for download and conversion by using process output
+		//TODO for exit process on abort or close
+		//TODO add setting to change download folder
+		//TODO add setting for number of parallel processes
 
 		private int _progressValue;
 		private string _playList;
@@ -20,7 +25,10 @@ namespace PlaylistDownloader
 		private bool _isEditPanelVisible;
 		private string _abortButtonLabel;
 		private string _query;
-		private string _numberOfResults;
+		private string _numberOfResultsInput;
+		private int _numberOfResults;
+		private bool _isNumberOfResultsValid;
+		private bool _isQueryValid;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
 		private const string ABORT_LABEL = "Abort";
 		private const string BACK_LABEL = "Back";
@@ -36,7 +44,7 @@ namespace PlaylistDownloader
 			AbortButtonLabel = ABORT_LABEL;
 			IsIndeterminate = false;
 			IsEditPanelVisible = true;
-			NumberOfResults = "20";
+			NumberOfResultsInput = "20";
 
 			PlayListItems = new ObservableCollection<PlaylistItem>();
 		}
@@ -49,6 +57,7 @@ namespace PlaylistDownloader
 				if (value == _playList) return;
 				_playList = value;
 				OnPropertyChanged("PlayList");
+				OnPropertyChanged("IsDownloadButtonEnabled");
 			}
 		}
 
@@ -123,19 +132,64 @@ namespace PlaylistDownloader
 			{
 				if (value == _query) return;
 				_query = value;
+				IsQueryValid = !string.IsNullOrWhiteSpace(_query);
 				OnPropertyChanged("Query");
 			}
 		}
 
-		public string NumberOfResults
+		public bool IsQueryValid
 		{
-			get { return _numberOfResults; }
+			get { return _isQueryValid; }
 			set
 			{
-				if (value == _numberOfResults) return;
-				_numberOfResults = value;
-				OnPropertyChanged("NumberOfResults");
+				_isQueryValid = value;
+				OnPropertyChanged("IsSearchButtonEnabled");
+				OnPropertyChanged("SearchButtonError");
 			}
+		}
+
+		public string NumberOfResultsInput
+		{
+			get { return _numberOfResultsInput; }
+			set
+			{
+				if (value == _numberOfResultsInput) return;
+				_numberOfResultsInput = value;
+				IsNumberOfResultsValid = int.TryParse(_numberOfResultsInput, out _numberOfResults);
+				OnPropertyChanged("NumberOfResultsInput");
+			}
+		}
+
+		public bool IsNumberOfResultsValid
+		{
+			get { return _isNumberOfResultsValid; }
+			set
+			{
+				if (value.Equals(_isNumberOfResultsValid)) return;
+				_isNumberOfResultsValid = value;
+				OnPropertyChanged("IsSearchButtonEnabled");
+				OnPropertyChanged("SearchButtonError");
+			}
+		}
+
+		public bool IsDownloadButtonEnabled
+		{
+			get { return !PlayList.Equals(INSTRUCTIONS) && !string.IsNullOrWhiteSpace(PlayList); }
+		}
+
+		public string DownloadButtonError
+		{
+			get { return IsDownloadButtonEnabled ? "" : "Playlist needs to contain some song titles"; }
+		}
+
+		public bool IsSearchButtonEnabled
+		{
+			get { return IsNumberOfResultsValid && IsQueryValid; }
+		}
+
+		public string SearchButtonError
+		{
+			get { return (IsQueryValid ? "" : "The query has to be filled in") + (IsNumberOfResultsValid ? "" : "Number of results is not a valid number"); }
 		}
 
 		private void DownloadButtonClick(object sender, RoutedEventArgs e)
@@ -216,7 +270,7 @@ namespace PlaylistDownloader
 				return;
 			}
 			int numberOfResults;
-			if (!int.TryParse(NumberOfResults, out numberOfResults) || numberOfResults < 1)
+			if (!int.TryParse(NumberOfResultsInput, out numberOfResults) || numberOfResults < 1)
 			{
 				MessageBox.Show("Number of pages is not a valid number");
 			}
@@ -227,6 +281,11 @@ namespace PlaylistDownloader
 			{
 				PlayList += link.Label + "\n"; //TODO store urls of songs in cache => quicker to download, no need for lookup on youtube
 			}
+		}
+
+		private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
+		{
+			Process.Start("songs");
 		}
 	}
 }

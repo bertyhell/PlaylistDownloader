@@ -132,6 +132,7 @@
     <Resource Include="img\cancel.png" />
     <Resource Include="img\download.png" />
     <Resource Include="img\search.png" />
+    <Resource Include="img\folder_music.png" />
     <Content Include="youtube-dl.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
