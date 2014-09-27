@@ -17,9 +17,9 @@ DefaultDirName={pf}\PlaylistDownloader
 DisableDirPage=yes
 DefaultGroupName=PlaylistDownloader
 DisableProgramGroupPage=yes
-LicenseFile=C:\Dropbox\personal\PlaylistDownloader\license.txt
 OutputBaseFilename=setup
-SetupIconFile=C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico
+SetupIconFile=C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico 
+UninstallDisplayIcon=C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -27,7 +27,7 @@ SolidCompression=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
 Source: "C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloaderDistWithUpdater\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
