@@ -16,6 +16,7 @@ ChangeLog
 - Added "open download folder" button
 - Double click on song to start playing
 - Added percentage to every playlist item
+- added auto updater
 
 ##Version 1.1
 
