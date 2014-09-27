@@ -38,7 +38,7 @@ namespace PlaylistDownloader
 			if (response.StatusCode == HttpStatusCode.OK)
 			{
 				Stream receiveStream = response.GetResponseStream();
-				StreamReader readStream = null;
+				StreamReader readStream;
 				if (response.CharacterSet == null)
 				{
 					readStream = new StreamReader(receiveStream);

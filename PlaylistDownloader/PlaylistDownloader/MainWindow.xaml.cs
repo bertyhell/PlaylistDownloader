@@ -2,8 +2,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using PlaylistDownloader.Annotations;
 
 namespace PlaylistDownloader
@@ -192,13 +194,20 @@ namespace PlaylistDownloader
 			get { return (IsQueryValid ? "" : "The query has to be filled in") + (IsNumberOfResultsValid ? "" : "Number of results is not a valid number"); }
 		}
 
+		public PlaylistItem SelectedPlaylistItem { get; set; }
+
 		private void DownloadButtonClick(object sender, RoutedEventArgs e)
 		{
+			AbortButtonLabel = ABORT_LABEL;
 			IsEditPanelVisible = false;
 			IsIndeterminate = true;
 
 			PlayListItems.Clear();
-			PlayList.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s.Trim())).ToList().ForEach(s => PlayListItems.Add(new PlaylistItem(this) { Name = s }));
+			PlayList
+				.Split('\n')
+				.Where(s => !string.IsNullOrWhiteSpace(s.Trim()))
+				.ToList().
+				ForEach(s => PlayListItems.Add(new PlaylistItem(this) { Name = s }));
 
 			_downloader = new Downloader(PlayListItems)
 						  {
@@ -234,7 +243,7 @@ namespace PlaylistDownloader
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		private void TextBoxMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void TextBoxMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (PlayList.Equals(INSTRUCTIONS)) PlayList = "";
 		}
@@ -285,7 +294,22 @@ namespace PlaylistDownloader
 
 		private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
 		{
+			Directory.CreateDirectory("songs");
 			Process.Start("songs");
+		}
+
+		private void PlaylistItemDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			if (SelectedPlaylistItem != null &&
+				SelectedPlaylistItem.ConvertProgress == 100 &&
+				SelectedPlaylistItem.DownloadProgress == 100)
+			{
+				string filePath = Path.GetFullPath("./songs/" + SelectedPlaylistItem.FileName + ".mp3");
+				if (File.Exists(filePath))
+				{
+					Process.Start(filePath);
+				}
+			}
 		}
 	}
 }

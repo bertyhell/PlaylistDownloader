@@ -64,7 +64,7 @@
 				</StackPanel>
 			</Button>
 		</Grid>
-		<Grid Visibility="{Binding ProgressPanelVisibility}" Grid.ColumnSpan="2">
+		<Grid Visibility="{Binding ProgressPanelVisibility}" Grid.ColumnSpan="2" Grid.Column="0">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="530*"/>
 				<ColumnDefinition Width="150"/>
@@ -77,28 +77,37 @@
 			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" Grid.ColumnSpan="2" />
 
 			<DataGrid Margin="0 0 0 5" ItemsSource="{Binding PlayListItems}" Grid.Row="0" Grid.Column="0" AlternatingRowBackground="#f8f8f8"
-			CanUserSortColumns="true" GridLinesVisibility="None" SelectionMode="Single"
+			CanUserSortColumns="true" GridLinesVisibility="None" SelectionMode="Single" SelectedItem="{Binding SelectedPlaylistItem}" MouseDoubleClick="PlaylistItemDoubleClick"
 			IsReadOnly="True" CanUserResizeRows="False" AutoGenerateColumns="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Song" Binding="{Binding Name}" Width="500" />
 					<DataGridTemplateColumn Header="Download" >
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<ProgressBar Value="{Binding DownloadProgress}" Width="Auto" Foreground="{Binding DownloadStatusColor}"/>
+								<Grid>
+									<ProgressBar Value="{Binding DownloadProgress}" Width="Auto" Foreground="{Binding DownloadStatusColor}"/>
+									<TextBlock Text="{Binding DownloadProgress, StringFormat='{}{0}%'}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"></TextBlock>
+								</Grid>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
 					<DataGridTemplateColumn Header="Conversion" >
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<ProgressBar Value="{Binding ConvertProgress}" Width="Auto"  Foreground="{Binding ConvertStatusColor}"/>
+								<Grid>
+									<ProgressBar Value="{Binding ConvertProgress}" Width="Auto" Foreground="{Binding ConvertStatusColor}"/>
+									<TextBlock Text="{Binding ConvertProgress, StringFormat='{}{0}%'}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"></TextBlock>
+								</Grid>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
 				</DataGrid.Columns>
 			</DataGrid>
 
-			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" Grid.ColumnSpan="2" />
+			<ProgressBar Grid.Row="1" Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" Grid.ColumnSpan="2"
+			             Grid.Column="0" />
+			<TextBlock Text="{Binding ProgressValue, StringFormat='{}{0}%'}" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0"
+					   HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"></TextBlock>
 
 			<Button Grid.Row="2" Click="AbortButtonClick" Grid.Column="0">
 				<StackPanel Orientation="Horizontal">

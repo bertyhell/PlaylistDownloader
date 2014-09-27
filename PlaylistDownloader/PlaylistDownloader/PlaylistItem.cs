@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
 using System.Windows.Media;
-using System.Windows.Threading;
 using PlaylistDownloader.Annotations;
 
 namespace PlaylistDownloader
