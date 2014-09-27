@@ -37,13 +37,37 @@ namespace SilentUpdater.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.2")]
-        public double CurrentVersion {
+        [global::System.Configuration.DefaultSettingValueAttribute("1.1")]
+        public string CurrentVersion {
             get {
-                return ((double)(this["CurrentVersion"]));
+                return ((string)(this["CurrentVersion"]));
             }
             set {
                 this["CurrentVersion"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PlaylistDownloaderDist/PlaylistDownloader.exe")]
+        public string ExecutablePath {
+            get {
+                return ((string)(this["ExecutablePath"]));
+            }
+            set {
+                this["ExecutablePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int KeepVersions {
+            get {
+                return ((int)(this["KeepVersions"]));
+            }
+            set {
+                this["KeepVersions"] = value;
             }
         }
     }
