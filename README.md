@@ -11,11 +11,11 @@ ChangeLog
 
 ##Version 1.2
 
-More finegrained progress for download and conversion process
-Correctly aborts processes when user clicks abort
-Added "open download folder" button
-Double click on song to start playing
-Added percentage to every playlist item
+- More finegrained progress for download and conversion process
+- Correctly aborts processes when user clicks abort
+- Added "open download folder" button
+- Double click on song to start playing
+- Added percentage to every playlist item
 
 ##Version 1.1
 
