@@ -14,43 +14,47 @@ namespace SilentUpdater
 	class Program
 	{
 		private static readonly Regex VERSION_DIRECTORY_REGEX = new Regex(@"[0-9]+(\.[0-9]*)?");
-		private static string _newVersionFileName;
+		private static string _newVersionFilePath;
 		private static Manifest _manifest;
 
 		static void Main()
 		{
-			//start latest local version
-			string currentVersionExe = Path.GetFullPath(Path.Combine(Settings.Default.CurrentVersion, Settings.Default.ExecutablePath));
-			if (File.Exists(currentVersionExe))
-				Process.Start(currentVersionExe);
-
-			//check online if new version is availible
-			_manifest = GetManifest();
-
-			if (double.Parse(_manifest.LatestVersion) > double.Parse(Settings.Default.CurrentVersion))
+			try
 			{
-				//update is needed
+				//start latest local version
+				string currentVersionExe =
+					Path.GetFullPath(Path.Combine(Settings.Default.CurrentVersion, Settings.Default.ExecutablePath));
+				if (File.Exists(currentVersionExe))
+					Process.Start(currentVersionExe);
 
-				//download new version zip
-				_newVersionFileName = _manifest.LatestVersion + ".zip";
-				DownloadNewVersion(_manifest.DistUrl, _newVersionFileName);
+				//check online if new version is availible
+				_manifest = GetManifest();
+
+				if (double.Parse(_manifest.LatestVersion) > double.Parse(Settings.Default.CurrentVersion))
+				{
+					//update is needed
+
+					//download new version zip
+					_newVersionFilePath = Path.GetFullPath(_manifest.LatestVersion + ".zip");
+					DownloadNewVersion(_manifest.DistUrl, _newVersionFilePath);
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
 			}
 		}
 
-		private static void DownloadNewVersion(string url, string filename)
+		private static void DownloadNewVersion(string url, string filePath)
 		{
-			WebClient webClient = new WebClient();
-			webClient.DownloadFileCompleted += DownloadNewVersionCompleted;
-			webClient.DownloadFileAsync(new Uri(url), filename);
-		}
+			new WebClient().DownloadFile(new Uri(url), filePath);
 
-		static void DownloadNewVersionCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-		{
 			//unzip new version
-			Zipper.ExtractZipFile(_newVersionFileName, _manifest.LatestVersion);
+			Zipper.ExtractZipFile(_newVersionFilePath, Path.GetFullPath(_manifest.LatestVersion));
 			string lastVersion = Settings.Default.CurrentVersion;
 			Settings.Default.CurrentVersion = _manifest.LatestVersion;
 			Settings.Default.Save();
+			File.Delete(_newVersionFilePath);
 
 			//remove older versions
 			List<string> versionDirs = Directory.GetDirectories(".")

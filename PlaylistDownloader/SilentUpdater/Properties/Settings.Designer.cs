@@ -25,7 +25,8 @@ namespace SilentUpdater.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloader/Sil" +
+            "entUpdater/update-manifest.json")]
         public string UpdateManifestPath {
             get {
                 return ((string)(this["UpdateManifestPath"]));

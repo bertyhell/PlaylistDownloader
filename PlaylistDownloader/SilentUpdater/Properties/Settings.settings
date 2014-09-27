@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="UpdateManifestPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">https://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloader/SilentUpdater/update-manifest.json</Value>
     </Setting>
     <Setting Name="CurrentVersion" Type="System.String" Scope="User">
       <Value Profile="(Default)">1.1</Value>
