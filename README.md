@@ -12,6 +12,10 @@ Download your whole playlist with one click of a button (textfile with title to 
 ChangeLog
 =========
 
+##Version 1.3 and up
+
+https://github.com/bertyhell/PlaylistDownloader/releases
+
 ##Version 1.2
 
 - More finegrained progress for download and conversion process
