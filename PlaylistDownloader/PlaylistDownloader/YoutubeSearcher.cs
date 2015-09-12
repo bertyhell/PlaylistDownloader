@@ -19,7 +19,7 @@ namespace PlaylistDownloader
 			int page = 1;
 			while (page < 20 && links.Count() < numberOfResults)
 			{
-				string requestUrl = string.Format(URL, HttpUtility.UrlEncode(query).Replace("%20", "+"), page);
+				string requestUrl = string.Format(URL, HttpUtility.UrlEncode(query)?.Replace("%20", "+"), page);
 				HtmlDocument doc = new HtmlDocument();
 				doc.LoadHtml(GetWebPageCode(requestUrl));
 				IEnumerable<HtmlNode> nodes = doc.DocumentNode.QuerySelectorAll("#results h3 > a");
@@ -38,19 +38,23 @@ namespace PlaylistDownloader
 			if (response.StatusCode == HttpStatusCode.OK)
 			{
 				Stream receiveStream = response.GetResponseStream();
-				StreamReader readStream;
-				if (response.CharacterSet == null)
-				{
-					readStream = new StreamReader(receiveStream);
-				}
-				else
-				{
-					readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-				}
-				string data = readStream.ReadToEnd();
-				response.Close();
-				readStream.Close();
-				return data;
+			    if (receiveStream != null)
+			    {
+			        StreamReader readStream;
+			        if (response.CharacterSet == null)
+			        {
+			            readStream = new StreamReader(receiveStream);
+			        }
+			        else
+			        {
+			            readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+			        }
+			        string data = readStream.ReadToEnd();
+			        response.Close();
+			        readStream.Close();
+			        return data;
+			    }
+			    return null;
 			}
 			return null;
 		}

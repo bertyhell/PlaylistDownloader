@@ -10,7 +10,7 @@ using PlaylistDownloader.Annotations;
 
 namespace PlaylistDownloader
 {
-	public partial class MainWindow : Window, INotifyPropertyChanged
+	public partial class MainWindow : INotifyPropertyChanged
 	{
 		//TODO show different icon for back button than for abort button
 
@@ -240,7 +240,7 @@ namespace PlaylistDownloader
 		protected virtual void OnPropertyChanged(string propertyName = null)
 		{
 			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+		    handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
 		private void TextBoxMouseDown(object sender, MouseButtonEventArgs e)
@@ -301,7 +301,6 @@ namespace PlaylistDownloader
 		private void PlaylistItemDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (SelectedPlaylistItem != null &&
-				SelectedPlaylistItem.ConvertProgress == 100 &&
 				SelectedPlaylistItem.DownloadProgress == 100)
 			{
 				string filePath = Path.GetFullPath("./songs/" + SelectedPlaylistItem.FileName + ".mp3");

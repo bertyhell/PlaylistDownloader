@@ -18,8 +18,8 @@ DisableDirPage=yes
 DefaultGroupName=PlaylistDownloader
 DisableProgramGroupPage=yes
 OutputBaseFilename=setup
-SetupIconFile=C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico 
-UninstallDisplayIcon=C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico
+SetupIconFile=C:\Users\Bert\Google Drive\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico 
+UninstallDisplayIcon=C:\Users\Bert\Google Drive\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\icon.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -30,7 +30,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "C:\Dropbox\personal\PlaylistDownloader\PlaylistDownloaderDistWithUpdater\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Bert\Google Drive\personal\PlaylistDownloader\PlaylistDownloaderDistWithUpdater\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
