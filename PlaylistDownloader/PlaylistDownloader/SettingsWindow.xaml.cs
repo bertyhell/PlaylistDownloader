@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +9,7 @@ using PlaylistDownloader.Annotations;
 
 namespace PlaylistDownloader
 {
-	public partial class MainWindow : INotifyPropertyChanged
+	public partial class SettingsWindow : INotifyPropertyChanged
 	{
 		//TODO show different icon for back button than for abort button
 
@@ -19,11 +18,10 @@ namespace PlaylistDownloader
 		//TODO for exit process on abort or close
 		//TODO add setting to change download folder
 		//TODO add setting for number of parallel processes
-
-		private int _progressValue;
+        
 		private string _playList;
 		private bool _isIndeterminate;
-		private Downloader _downloader;
+		//private Downloader _downloader;
 		private bool _isEditPanelVisible;
 		private string _abortButtonLabel;
 		private string _query;
@@ -32,23 +30,18 @@ namespace PlaylistDownloader
 		private bool _isNumberOfResultsValid;
 		private bool _isQueryValid;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
-		private const string ABORT_LABEL = "Abort";
-		private const string BACK_LABEL = "Back";
 
 
-		public MainWindow()
+		public SettingsWindow()
 		{
 			InitializeComponent();
 
 			DataContext = this;
 
 			PlayList = INSTRUCTIONS;
-			AbortButtonLabel = ABORT_LABEL;
 			IsIndeterminate = false;
 			IsEditPanelVisible = true;
 			NumberOfResultsInput = "20";
-
-			PlayListItems = new ObservableCollection<PlaylistItem>();
 		}
 
 		public string PlayList
@@ -62,18 +55,7 @@ namespace PlaylistDownloader
 				OnPropertyChanged("IsDownloadButtonEnabled");
 			}
 		}
-
-		public int ProgressValue
-		{
-			get { return _progressValue; }
-			set
-			{
-				if (value == _progressValue) return;
-				_progressValue = value;
-				OnPropertyChanged("ProgressValue");
-			}
-		}
-
+        
 		public bool IsIndeterminate
 		{
 			get { return _isIndeterminate; }
@@ -95,9 +77,7 @@ namespace PlaylistDownloader
 				OnPropertyChanged("AbortButtonLabel");
 			}
 		}
-
-		public ObservableCollection<PlaylistItem> PlayListItems { get; private set; }
-
+        
 		public Visibility ProgressPanelVisibility
 		{
 			get
@@ -198,42 +178,20 @@ namespace PlaylistDownloader
 
 		private void DownloadButtonClick(object sender, RoutedEventArgs e)
 		{
-			AbortButtonLabel = ABORT_LABEL;
 			IsEditPanelVisible = false;
 			IsIndeterminate = true;
-
-			PlayListItems.Clear();
+            
+            List<PlaylistItem> playlistItems = new List<PlaylistItem>();
 			PlayList
 				.Split('\n')
 				.Where(s => !string.IsNullOrWhiteSpace(s.Trim()))
 				.ToList().
-				ForEach(s => PlayListItems.Add(new PlaylistItem(this) { Name = s }));
+				ForEach(s => playlistItems.Add(new PlaylistItem(this) { Name = s }));
 
-			_downloader = new Downloader(PlayListItems)
-						  {
-							  WorkerReportsProgress = true,
-							  WorkerSupportsCancellation = true
-						  };
-
-			_downloader.ProgressChanged += DownloaderProgressChanged;
-			_downloader.RunWorkerCompleted += DownloaderRunWorkerCompleted;
-
-
-			_downloader.RunWorkerAsync();
+		    new DownloadWindow(playlistItems, this).Show();
+            Hide();
 		}
-
-		void DownloaderRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-		{
-			//TODO 070 wait for cancel to complete before re-enabling download button
-			AbortButtonLabel = BACK_LABEL;
-		}
-
-		private void DownloaderProgressChanged(object sender, ProgressChangedEventArgs e)
-		{
-			IsIndeterminate = false;
-			ProgressValue = e.ProgressPercentage;
-		}
-
+        
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		[NotifyPropertyChangedInvocator]
@@ -246,23 +204,6 @@ namespace PlaylistDownloader
 		private void TextBoxMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (PlayList.Equals(INSTRUCTIONS)) PlayList = "";
-		}
-
-
-		private void AbortButtonClick(object sender, RoutedEventArgs e)
-		{
-			if (AbortButtonLabel == ABORT_LABEL)
-			{
-				_downloader.CancelAsync();
-				_downloader = null;
-				ProgressValue = 0;
-				IsEditPanelVisible = true;
-			}
-			else
-			{
-				IsEditPanelVisible = true;
-				AbortButtonLabel = ABORT_LABEL;
-			}
 		}
 
 		private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -297,18 +238,6 @@ namespace PlaylistDownloader
 			Directory.CreateDirectory("songs");
 			Process.Start("songs");
 		}
-
-		private void PlaylistItemDoubleClick(object sender, MouseButtonEventArgs e)
-		{
-			if (SelectedPlaylistItem != null &&
-				SelectedPlaylistItem.DownloadProgress == 100)
-			{
-				string filePath = Path.GetFullPath("./songs/" + SelectedPlaylistItem.FileName + ".mp3");
-				if (File.Exists(filePath))
-				{
-					Process.Start(filePath);
-				}
-			}
-		}
+        
 	}
 }
