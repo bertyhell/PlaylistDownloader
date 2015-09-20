@@ -3,8 +3,10 @@ PlaylistDownloader
 
 Download your whole playlist with one click of a button (textfile with title to folder with mp3 files)
 
+<<<<<<< HEAD
 - [![Download](img/download-installer.png)](PlaylistDownloaderSetup.exe)
 - [![Download](img/download-zip.png)](PlayListDownloaderDist.zip)
+
 
 ![main window screenshot](img/screenshot1.png)
 ![main window screenshot](img/screenshot2.png)
