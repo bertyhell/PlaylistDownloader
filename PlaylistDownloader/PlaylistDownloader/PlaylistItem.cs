@@ -6,14 +6,14 @@ namespace PlaylistDownloader
 {
 	public class PlaylistItem : INotifyPropertyChanged
 	{
-		private readonly MainWindow _mainWindow;
+		private readonly SettingsWindow _settingsWindow;
 		private string _name;
 		private int _downloadProgress;
 		private SolidColorBrush _downloadStatusColor;
 
-		public PlaylistItem(MainWindow mainWindow)
+		public PlaylistItem(SettingsWindow settingsWindow)
 		{
-			_mainWindow = mainWindow;
+			_settingsWindow = settingsWindow;
 			DownloadProgress = 0;
 			DownloadStatusColor = new SolidColorBrush(Colors.LightGreen);
 		}
@@ -50,7 +50,7 @@ namespace PlaylistDownloader
 
 		public void SetDownloadStatus(bool success)
 		{
-			_mainWindow.Dispatcher.Invoke(new SetPlaylistItemStatusDelegate(SetPlaylistStatus), this, true, success);
+			_settingsWindow.Dispatcher.Invoke(new SetPlaylistItemStatusDelegate(SetPlaylistStatus), this, true, success);
 		}
 
 		private delegate void SetPlaylistItemStatusDelegate(PlaylistItem playlistItem, bool isDownloadStatus, bool success);

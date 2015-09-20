@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{B0011CEC-2AE2-40CF-9136-C2BD13928896}
 AppName=PlaylistDownloader
-AppVersion=1.2
-;AppVerName=PlaylistDownloader 1.2
+AppVersion=1.3
+;AppVerName=PlaylistDownloader 1.3
 AppPublisher=Berty productions
 AppPublisherURL=https://github.com/bertyhell/PlaylistDownloader
 AppSupportURL=https://github.com/bertyhell/PlaylistDownloader
@@ -30,7 +30,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "C:\Users\Bert\Google Drive\personal\PlaylistDownloader\PlaylistDownloaderDistWithUpdater\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Bert\Google Drive\personal\PlaylistDownloader\PlaylistDownloader\PlaylistDownloader\bin\Debug\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
