@@ -3,8 +3,8 @@ PlaylistDownloader
 
 Download your whole playlist with one click of a button (textfile with title to folder with mp3 files)
 
-- [Download the installer](http://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloaderSetup.exe)
-- [Download the zip-file](http://github.com/bertyhell/PlaylistDownloader/raw/master/PlayListDownloaderDist.zip)
+- [Download the installer](https://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloaderSetup-v1.3.exe)
+- [Download the zip-file](https://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloaderDist-v1.3.zip)
 
 ![main window screenshot](screenshot1.png)
 ![main window screenshot](screenshot2.png)
