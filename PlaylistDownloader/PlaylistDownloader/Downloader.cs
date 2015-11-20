@@ -42,18 +42,29 @@ namespace PlaylistDownloader
 
 			try
 			{
-				//execute for both processes
-				Parallel.ForEach(_playlist, po, item =>
-					{
-						try
-						{
-							DownloadPlaylistItem(item, po);
-							//ConvertPlaylistItem(item, po);
-						}
-						catch (InvalidOperationException) { } //ignore exceptions when aborting download
-						catch (Win32Exception) { } //ignore process exception if killed during process exiting
-					});
-			}
+                // Parallal execution
+                Parallel.ForEach(_playlist, po, item =>
+                    {
+                        try
+                        {
+                            DownloadPlaylistItem(item, po);
+                            //ConvertPlaylistItem(item, po);
+                        }
+                        catch (InvalidOperationException) { } //ignore exceptions when aborting download
+                        catch (Win32Exception) { } //ignore process exception if killed during process exiting
+                    });
+                // Serial execution
+                //foreach (PlaylistItem item in _playlist)
+                //{
+                //    try
+                //    {
+                //        DownloadPlaylistItem(item, po);
+                //        //ConvertPlaylistItem(item, po);
+                //    }
+                //    catch (InvalidOperationException) { } //ignore exceptions when aborting download
+                //    catch (Win32Exception) { } //ignore process exception if killed during process exiting
+                //}
+            }
 			catch (OperationCanceledException) { } //ignore exceptions caused by canceling paralel.foreach loop
 		}
 

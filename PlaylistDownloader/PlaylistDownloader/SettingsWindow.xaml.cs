@@ -42,7 +42,21 @@ namespace PlaylistDownloader
 			IsIndeterminate = false;
 			IsEditPanelVisible = true;
 			NumberOfResultsInput = "20";
-		}
+
+            // Update youtube-dl.exe
+		    new Process
+		    {
+		        StartInfo =
+		        {
+		            FileName = "youtube-dl.exe",
+		            Arguments = " -U",
+		            CreateNoWindow = true,
+		            WindowStyle = ProcessWindowStyle.Hidden,
+		            RedirectStandardOutput = true,
+		            UseShellExecute = false
+		        }
+		    }.Start();
+        }
 
 		public string PlayList
 		{
