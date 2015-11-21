@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using PlaylistDownloader.Annotations;
+using System;
 
 namespace PlaylistDownloader
 {
@@ -18,6 +19,7 @@ namespace PlaylistDownloader
 		//TODO for exit process on abort or close
 		//TODO add setting to change download folder
 		//TODO add setting for number of parallel processes
+        //TODO switch mymusic folder to the downloads folder
         
 		private string _playList;
 		private bool _isIndeterminate;
@@ -30,9 +32,9 @@ namespace PlaylistDownloader
 		private bool _isNumberOfResultsValid;
 		private bool _isQueryValid;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
-
-
-		public SettingsWindow()
+        public static readonly string SONGS_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
+        
+        public SettingsWindow()
 		{
 			InitializeComponent();
 
@@ -249,8 +251,8 @@ namespace PlaylistDownloader
 
 		private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
 		{
-			Directory.CreateDirectory("songs");
-			Process.Start("songs");
+			Directory.CreateDirectory(SettingsWindow.SONGS_FOLDER);
+			Process.Start(SettingsWindow.SONGS_FOLDER);
 		}
         
 	}

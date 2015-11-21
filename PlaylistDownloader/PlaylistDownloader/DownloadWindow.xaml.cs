@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using PlaylistDownloader.Annotations;
+using System;
 
 //TODO 070 wait for cancel to complete before re-enabling download button
 
@@ -130,8 +131,8 @@ namespace PlaylistDownloader
 
         private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
 		{
-			Directory.CreateDirectory("songs");
-			Process.Start("songs");
+			Directory.CreateDirectory(SettingsWindow.SONGS_FOLDER);
+			Process.Start(SettingsWindow.SONGS_FOLDER);
 		}
 
 		private void PlaylistItemDoubleClick(object sender, MouseButtonEventArgs e)
@@ -139,7 +140,7 @@ namespace PlaylistDownloader
 			if (SelectedPlaylistItem != null &&
 				SelectedPlaylistItem.DownloadProgress == 100)
 			{
-				string filePath = Path.GetFullPath("./songs/" + SelectedPlaylistItem.FileName + ".mp3");
+				string filePath = Path.GetFullPath(SettingsWindow.SONGS_FOLDER + "/" + SelectedPlaylistItem.FileName + ".mp3");
 				if (File.Exists(filePath))
 				{
 					Process.Start(filePath);

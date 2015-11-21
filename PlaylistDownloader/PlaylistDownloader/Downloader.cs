@@ -20,8 +20,8 @@ namespace PlaylistDownloader
 		private int _progress;
 		private readonly int _totalSongs;
 		private readonly CancellationTokenSource _cts;
-        
-		public Downloader(ICollection<PlaylistItem> playlist)
+
+        public Downloader(ICollection<PlaylistItem> playlist)
 		{
 			_playlist = playlist;
 			_totalSongs = _playlist.Count;
@@ -74,8 +74,7 @@ namespace PlaylistDownloader
 			if (!string.IsNullOrWhiteSpace(item.Name))
 			{
 				item.FileName = MakeValidFileName(item.Name);
-				if (//!File.Exists("./songs/" + item.FileName + ".m4a") &&
-					!File.Exists("./songs/" + item.FileName + ".mp3"))
+				if (!File.Exists(SettingsWindow.SONGS_FOLDER + "/" + item.FileName + ".mp3"))
 				{
 					YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
 
@@ -94,8 +93,8 @@ namespace PlaylistDownloader
 								FileName = "youtube-dl.exe",
 								Arguments =
 									string.Format(
-										" --extract-audio --audio-format mp3 -o \"./songs/{0}.%(ext)s\" {1}",
-										item.FileName, youtubeLink.Url),
+                                         " --ffmpeg-location ./ffmpeg --extract-audio --audio-format mp3 -o \"{2}/{0}.%(ext)s\" {1}",
+										item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
 								CreateNoWindow = true,
 								WindowStyle = ProcessWindowStyle.Hidden,
 								RedirectStandardOutput = true,
