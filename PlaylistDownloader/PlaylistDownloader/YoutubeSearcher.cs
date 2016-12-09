@@ -11,13 +11,13 @@ namespace PlaylistDownloader
 {
 	public static class YoutubeSearcher
 	{
-		const string URL = "http://www.youtube.com/results?search_query={0}&page={1}";
+		private const string URL = "http://www.youtube.com/results?search_query={0}&page={1}";
 
 		public static IEnumerable<YoutubeLink> GetYoutubeLinks(string query, int numberOfResults = 1)
 		{
 			List<YoutubeLink> links = new List<YoutubeLink>();
 			int page = 1;
-			while (page < 20 && links.Count() < numberOfResults)
+			while (page < 20 && links.Count < numberOfResults)
 			{
 				string requestUrl = string.Format(URL, HttpUtility.UrlEncode(query)?.Replace("%20", "+"), page);
 				HtmlDocument doc = new HtmlDocument();
@@ -28,7 +28,7 @@ namespace PlaylistDownloader
 				page++;
 			}
 			return links;
-			//TODO 040 make sure program correctly stops if page is not existent => message to user
+			// TODO 040 make sure program correctly stops if page is not existent => message to user
 		}
 
 		private static string GetWebPageCode(string url)

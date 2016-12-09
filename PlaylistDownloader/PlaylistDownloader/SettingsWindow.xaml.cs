@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using PlaylistDownloader.Annotations;
 using System;
+using System.Configuration;
 
 namespace PlaylistDownloader
 {
@@ -33,6 +34,7 @@ namespace PlaylistDownloader
 		private bool _isQueryValid;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
         public static readonly string SONGS_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
+        private readonly bool _isDebugMode = bool.Parse(ConfigurationManager.AppSettings.Get("debug"));
         
         public SettingsWindow()
 		{
@@ -53,7 +55,7 @@ namespace PlaylistDownloader
 		            FileName = "youtube-dl.exe",
 		            Arguments = " -U",
 		            CreateNoWindow = true,
-		            WindowStyle = ProcessWindowStyle.Hidden,
+		            WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
 		            RedirectStandardOutput = true,
 		            UseShellExecute = false
 		        }

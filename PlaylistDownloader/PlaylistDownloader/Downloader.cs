@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,12 +15,14 @@ namespace PlaylistDownloader
 	{
 
 		private readonly ICollection<PlaylistItem> _playlist;
+        private readonly bool _isDebugMode = bool.Parse(ConfigurationManager.AppSettings.Get("debug"));
 
-		//[download]   0.9% of 3.45MiB at 553.57KiB/s ETA 00:06
-		private readonly Regex _extractDownloadProgress = new Regex(@"\[download\][\s]*([0-9\.]+)%");
+        //[download]   0.9% of 3.45MiB at 553.57KiB/s ETA 00:06
+        private readonly Regex _extractDownloadProgress = new Regex(@"\[download\][\s]*([0-9\.]+)%");
 		private int _progress;
 		private readonly int _totalSongs;
 		private readonly CancellationTokenSource _cts;
+
 
         public Downloader(ICollection<PlaylistItem> playlist)
 		{
@@ -91,12 +94,9 @@ namespace PlaylistDownloader
 							StartInfo =
 							{
 								FileName = "youtube-dl.exe",
-								Arguments =
-									string.Format(
-                                         " --ffmpeg-location ./ffmpeg --extract-audio --audio-format mp3 -o \"{2}/{0}.%(ext)s\" {1}",
-										item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
-								CreateNoWindow = true,
-								WindowStyle = ProcessWindowStyle.Hidden,
+								Arguments = string.Format(" --ffmpeg-location ./ffmpeg --extract-audio --audio-format mp3 -o \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
+								CreateNoWindow = !_isDebugMode,
+								WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
 								RedirectStandardOutput = true,
 								UseShellExecute = false
 							}
@@ -142,10 +142,11 @@ namespace PlaylistDownloader
 
 		private static string MakeValidFileName(string name)
 		{
-			string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
-			string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
-
-			return Regex.Replace(name, invalidRegStr, "_");
-		}
+            return Regex.Replace(
+                name,
+                "[\\W-]+",  /*Matches any nonword character. Equivalent to '[^A-Za-z0-9_]'*/
+                "-",
+                RegexOptions.IgnoreCase);
+        }
 	}
 }
