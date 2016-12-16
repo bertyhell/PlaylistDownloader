@@ -8,6 +8,7 @@ using System.Windows.Input;
 using PlaylistDownloader.Annotations;
 using System;
 using System.Configuration;
+using NLog;
 
 namespace PlaylistDownloader
 {
@@ -35,9 +36,11 @@ namespace PlaylistDownloader
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
         public static readonly string SONGS_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
         private readonly bool _isDebugMode = bool.Parse(ConfigurationManager.AppSettings.Get("debug"));
-        
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public SettingsWindow()
 		{
+            Logger.Info("App started");
 			InitializeComponent();
 
 			DataContext = this;
@@ -48,21 +51,57 @@ namespace PlaylistDownloader
 			NumberOfResultsInput = "20";
 
             // Update youtube-dl.exe
-		    new Process
-		    {
-		        StartInfo =
-		        {
-		            FileName = "youtube-dl.exe",
-		            Arguments = " -U",
-		            CreateNoWindow = true,
-		            WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
-		            RedirectStandardOutput = true,
-		            UseShellExecute = false
-		        }
-		    }.Start();
+            Logger.Info("Updating youtube downloader");
+            var youtubeDlExePath =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    "PlaylistDownloader", "youtube-dl.exe");
+            if (File.Exists(youtubeDlExePath))
+            {
+                Process process = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = youtubeDlExePath,
+                        Arguments = " -U",
+                        CreateNoWindow = true,
+                        WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false
+                    }
+                };
+                process.OutputDataReceived += Process_OutputDataReceived;
+                process.ErrorDataReceived += Process_ErrorDataReceived;
+
+                //Logger.Info(process.StandardOutput.ReadToEndAsync());
+                //Logger.Error(process.StandardError.ReadToEndAsync());
+                process.Exited += Process_Exited;
+                process.Start();
+                process.BeginOutputReadLine();
+            }
+            else
+            {
+                Logger.Error("Cannot find youtube-dl.exe. Expect file to be located in: " + youtubeDlExePath);
+            }
+
+		}
+
+        private void Process_Exited(object sender, EventArgs e)
+        {
+            Logger.Info("Update process existed. ");
         }
 
-		public string PlayList
+        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Logger.Error(e.Data);
+        }
+
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Logger.Info(e.Data);
+        }
+
+        public string PlayList
 		{
 			get { return _playList; }
 			set
@@ -253,8 +292,8 @@ namespace PlaylistDownloader
 
 		private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
 		{
-			Directory.CreateDirectory(SettingsWindow.SONGS_FOLDER);
-			Process.Start(SettingsWindow.SONGS_FOLDER);
+			Directory.CreateDirectory(SONGS_FOLDER);
+			Process.Start(SONGS_FOLDER);
 		}
         
 	}

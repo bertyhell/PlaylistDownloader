@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace PlaylistDownloader
 {
@@ -22,7 +23,7 @@ namespace PlaylistDownloader
 		private int _progress;
 		private readonly int _totalSongs;
 		private readonly CancellationTokenSource _cts;
-
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public Downloader(ICollection<PlaylistItem> playlist)
 		{
@@ -93,19 +94,21 @@ namespace PlaylistDownloader
 						{
 							StartInfo =
 							{
-								FileName = "youtube-dl.exe",
+								FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "PlaylistDownloader", "youtube-dl.exe"),
 								Arguments = string.Format(" --ffmpeg-location ./ffmpeg --extract-audio --audio-format mp3 -o \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
 								CreateNoWindow = !_isDebugMode,
 								WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
-								RedirectStandardOutput = true,
-								UseShellExecute = false
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                UseShellExecute = false
 							}
 						};
+                        
+                        youtubeDownloadProcess.ErrorDataReceived += Process_ErrorDataReceived; ;
+                        youtubeDownloadProcess.Start();
 
-						youtubeDownloadProcess.Start();
-
-						//extract progress from process
-						using (StreamReader reader = youtubeDownloadProcess.StandardOutput)
+                        //extract progress from process
+                        using (StreamReader reader = youtubeDownloadProcess.StandardOutput)
 						{
 							while (!youtubeDownloadProcess.HasExited)
 							{
@@ -124,6 +127,7 @@ namespace PlaylistDownloader
 								}
 								if (CancellationPending)
 								{
+                                    logger.Info("Canceling youtube downloader because of user.");
 									youtubeDownloadProcess.Close();
 									po.CancellationToken.ThrowIfCancellationRequested();
 								}
@@ -140,7 +144,12 @@ namespace PlaylistDownloader
 			OnProgressChanged(new ProgressChangedEventArgs(_progress * 100 / _totalSongs, null));
 		}
 
-		private static string MakeValidFileName(string name)
+        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            logger.Error(e.Data);
+        }
+
+        private static string MakeValidFileName(string name)
 		{
             return Regex.Replace(
                 name,

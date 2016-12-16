@@ -6,14 +6,16 @@ using System.Text;
 using System.Web;
 using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
+using NLog;
 
 namespace PlaylistDownloader
 {
 	public static class YoutubeSearcher
 	{
 		private const string URL = "http://www.youtube.com/results?search_query={0}&page={1}";
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
-		public static IEnumerable<YoutubeLink> GetYoutubeLinks(string query, int numberOfResults = 1)
+        public static IEnumerable<YoutubeLink> GetYoutubeLinks(string query, int numberOfResults = 1)
 		{
 			List<YoutubeLink> links = new List<YoutubeLink>();
 			int page = 1;
@@ -54,7 +56,11 @@ namespace PlaylistDownloader
 			        readStream.Close();
 			        return data;
 			    }
-			    return null;
+			    else
+			    {
+			        logger.Warn("No response from " + url);
+			    }
+                return null;
 			}
 			return null;
 		}

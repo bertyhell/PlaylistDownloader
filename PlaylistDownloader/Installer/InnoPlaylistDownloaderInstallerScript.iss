@@ -30,7 +30,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "..\PlaylistDownloader\bin\Debug\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\PlaylistDownloader\bin\Debug\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "ffmpeg/*,youtube-dl.exe,*.log"
+Source: "..\PlaylistDownloader\bin\Debug\youtube-dl.exe"; DestDir: "{commonappdata}/PlaylistDownloader"; Flags: ignoreversion recursesubdirs createallsubdirs 
+Source: "..\PlaylistDownloader\bin\Debug\ffmpeg\*"; DestDir: "{commonappdata}/PlaylistDownloader/ffmpeg"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
