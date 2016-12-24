@@ -1,4 +1,4 @@
-PlaylistDownloader 1.7
+PlaylistDownloader 1.8
 ======================
 
 Download your whole playlist with one click of a button (textfile with title to folder with mp3 files)
