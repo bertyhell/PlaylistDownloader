@@ -53,7 +53,7 @@ namespace PlaylistDownloader
             // Update youtube-dl.exe
             Logger.Info("Updating youtube downloader");
             var youtubeDlExePath =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "PlaylistDownloader", "youtube-dl.exe");
             if (File.Exists(youtubeDlExePath))
             {

@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{B0011CEC-2AE2-40CF-9136-C2BD13928896}
 AppName=PlaylistDownloader
-AppVersion=1.5
-AppVerName=PlaylistDownloader 1.5
+AppVersion=1.8
+AppVerName=PlaylistDownloader 1.8
 AppPublisher=Taxrebel productions
 AppPublisherURL=https://github.com/bertyhell/PlaylistDownloader
 AppSupportURL=https://github.com/bertyhell/PlaylistDownloader
@@ -18,8 +18,8 @@ DisableDirPage=yes
 DefaultGroupName=PlaylistDownloader
 DisableProgramGroupPage=yes
 OutputBaseFilename=setup
-SetupIconFile=..\PlaylistDownloader\icon.ico 
-UninstallDisplayIcon=..\PlaylistDownloader\icon.ico
+SetupIconFile=..\PlaylistDownloader\icon.ico
+UninstallDisplayIcon={app}\PlaylistDownloader.exe
 Compression=lzma
 SolidCompression=yes
 
@@ -31,8 +31,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "..\PlaylistDownloader\bin\Debug\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "ffmpeg/*,youtube-dl.exe,*.log"
-Source: "..\PlaylistDownloader\bin\Debug\youtube-dl.exe"; DestDir: "{commonappdata}/PlaylistDownloader"; Flags: ignoreversion recursesubdirs createallsubdirs 
-Source: "..\PlaylistDownloader\bin\Debug\ffmpeg\*"; DestDir: "{commonappdata}/PlaylistDownloader/ffmpeg"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\PlaylistDownloader\bin\Debug\youtube-dl.exe"; DestDir: "{userappdata}/PlaylistDownloader"; Flags: ignoreversion recursesubdirs createallsubdirs 
+Source: "..\PlaylistDownloader\bin\Debug\ffmpeg\*"; DestDir: "{userappdata}/PlaylistDownloader/ffmpeg"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

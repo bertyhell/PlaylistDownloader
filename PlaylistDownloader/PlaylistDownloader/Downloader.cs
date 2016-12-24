@@ -94,7 +94,7 @@ namespace PlaylistDownloader
 						{
 							StartInfo =
 							{
-								FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "PlaylistDownloader", "youtube-dl.exe"),
+								FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader", "youtube-dl.exe"),
 								Arguments = string.Format(" --ffmpeg-location ./ffmpeg --extract-audio --audio-format mp3 -o \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
 								CreateNoWindow = !_isDebugMode,
 								WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
