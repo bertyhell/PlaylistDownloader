@@ -26,7 +26,6 @@ namespace PlaylistDownloader
 		private string _playList;
 		private bool _isIndeterminate;
 		//private Downloader _downloader;
-		private bool _isEditPanelVisible;
 		private string _abortButtonLabel;
 		private string _query;
 		private string _numberOfResultsInput;
@@ -47,7 +46,6 @@ namespace PlaylistDownloader
 
 			PlayList = INSTRUCTIONS;
 			IsIndeterminate = false;
-			IsEditPanelVisible = true;
 			NumberOfResultsInput = "20";
 
             // Update youtube-dl.exe
@@ -134,35 +132,6 @@ namespace PlaylistDownloader
 				OnPropertyChanged("AbortButtonLabel");
 			}
 		}
-        
-		public Visibility ProgressPanelVisibility
-		{
-			get
-			{
-				return IsEditPanelVisible ? Visibility.Hidden : Visibility.Visible;
-			}
-		}
-
-		public Visibility EditPanelVisibility
-		{
-			get
-			{
-				return IsEditPanelVisible ? Visibility.Visible : Visibility.Hidden;
-			}
-		}
-
-		public bool IsEditPanelVisible
-		{
-			get { return _isEditPanelVisible; }
-			set
-			{
-				if (value.Equals(_isEditPanelVisible)) return;
-				_isEditPanelVisible = value;
-				OnPropertyChanged("IsEditPanelVisible");
-				OnPropertyChanged("ProgressPanelVisibility");
-				OnPropertyChanged("EditPanelVisibility");
-			}
-		}
 
 		public string Query
 		{
@@ -235,7 +204,6 @@ namespace PlaylistDownloader
 
 		private void DownloadButtonClick(object sender, RoutedEventArgs e)
 		{
-			IsEditPanelVisible = false;
 			IsIndeterminate = true;
             
             List<PlaylistItem> playlistItems = new List<PlaylistItem>();
@@ -245,8 +213,7 @@ namespace PlaylistDownloader
 				.ToList().
 				ForEach(s => playlistItems.Add(new PlaylistItem(this) { Name = s }));
 
-		    new DownloadWindow(playlistItems, this).Show();
-            Hide();
+		    new DownloadWindow(playlistItems, this).ShowDialog();
 		}
         
 		public event PropertyChangedEventHandler PropertyChanged;

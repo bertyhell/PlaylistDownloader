@@ -26,7 +26,8 @@ namespace PlaylistDownloader
 				doc.LoadHtml(GetWebPageCode(requestUrl));
 				IEnumerable<HtmlNode> nodes = doc.DocumentNode.QuerySelectorAll("#results h3 > a");
 
-				links.AddRange(nodes.Select(n => new YoutubeLink{ Url= "http://www.youtube.com" + n.Attributes["href"].Value, Label =  n.Attributes["title"].Value}));
+                // TODO expand youtube playlist into seperate songs
+				links.AddRange(nodes.Where(n => !n.Attributes["href"].Value.Contains("&amp;list=")).Select(n => new YoutubeLink{ Url= "http://www.youtube.com" + n.Attributes["href"].Value, Label =  n.Attributes["title"].Value}));
 				page++;
 			}
 			return links;
