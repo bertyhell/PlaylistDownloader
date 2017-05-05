@@ -4,4 +4,5 @@ PlaylistDownloader/SilentUpdater/obj/
 PlaylistDownloader/SilentUpdater/bin/
 PlaylistDownloader/Installer/Output/
 PlaylistDownloader/packages/
+dist/
 *.suo
