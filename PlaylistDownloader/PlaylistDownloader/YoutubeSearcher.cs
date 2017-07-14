@@ -16,21 +16,37 @@ namespace PlaylistDownloader
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public static IEnumerable<YoutubeLink> GetYoutubeLinks(string query, int numberOfResults = 1)
-		{
-			List<YoutubeLink> links = new List<YoutubeLink>();
-			int page = 1;
-			while (page < 20 && links.Count < numberOfResults)
-			{
-				string requestUrl = string.Format(URL, HttpUtility.UrlEncode(query)?.Replace("%20", "+"), page);
-				HtmlDocument doc = new HtmlDocument();
-				doc.LoadHtml(GetWebPageCode(requestUrl));
-				IEnumerable<HtmlNode> nodes = doc.DocumentNode.QuerySelectorAll("#results h3 > a");
+        {
+            List<YoutubeLink> links = new List<YoutubeLink>();
 
-                // TODO expand youtube playlist into seperate songs
-				links.AddRange(nodes.Where(n => !n.Attributes["href"].Value.Contains("&amp;list=")).Select(n => new YoutubeLink{ Url= "http://www.youtube.com" + n.Attributes["href"].Value, Label =  n.Attributes["title"].Value}));
-				page++;
-			}
+            string url = null;
+            if (query.StartsWith("http"))
+            {
+                //  Get title
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(GetWebPageCode(query));
+                HtmlNode node = doc.DocumentNode.QuerySelector(".watch-title-container .watch-title");
+                
+
+                links.Add(new YoutubeLink { Url = query, Label = node.InnerText });
+            }
+            else
+            {
+                int page = 1;
+                while (page < 20 && links.Count < numberOfResults)
+                {
+                    string requestUrl = string.Format(URL, HttpUtility.UrlEncode(query)?.Replace("%20", "+"), page);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(GetWebPageCode(requestUrl));
+                    IEnumerable<HtmlNode> nodes = doc.DocumentNode.QuerySelectorAll("#results h3 > a");
+
+                    // TODO expand youtube playlist into seperate songs
+                    links.AddRange(nodes.Where(n => !n.Attributes["href"].Value.Contains("&amp;list=")).Select(n => new YoutubeLink { Url = "http://www.youtube.com" + n.Attributes["href"].Value, Label = n.Attributes["title"].Value }));
+                    page++;
+                }
+            }
 			return links;
+
 			// TODO 040 make sure program correctly stops if page is not existent => message to user
 		}
 

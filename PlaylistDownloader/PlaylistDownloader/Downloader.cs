@@ -91,11 +91,12 @@ namespace PlaylistDownloader
             item.DownloadProgress = 5;
             if (!string.IsNullOrWhiteSpace(item.Name))
             {
-                item.FileName = MakeValidFileName(item.Name);
+
+                YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
+                item.FileName = MakeValidFileName(youtubeLink.Label);
+
                 if (!File.Exists(SettingsWindow.SONGS_FOLDER + "/" + item.FileName + ".mp3"))
                 {
-                    YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
-
                     item.DownloadProgress = 10;
 
                     if (youtubeLink == null)
@@ -104,12 +105,21 @@ namespace PlaylistDownloader
                     }
                     else
                     {
+                        string youtubeDlPath = Debugger.IsAttached
+                            ? "./youtube-dl.exe"
+                            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader", "youtube-dl.exe");
+
+                        // TODO execute this after download in speparate Process 
+                        // "&& .\\ffmpeg\\ffmpeg.exe -i {0}.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 48k test.mp3"
                         Process youtubeDownloadProcess = new Process
                         {
                             StartInfo =
                             {
-                                FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader", "youtube-dl.exe"),
-                                Arguments = string.Format(" --ffmpeg-location ./ffmpeg --extract-audio --audio-format mp3 -o \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
+                                FileName = youtubeDlPath,
+                                Arguments = string.Format(" --ffmpeg-location ./ffmpeg" +
+                                                          " --extract-audio" +
+                                                          " --audio-format mp3" +
+                                                          " --output \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
                                 CreateNoWindow = !_isDebugMode,
                                 WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
                                 RedirectStandardOutput = true,
@@ -127,6 +137,8 @@ namespace PlaylistDownloader
                             while (!youtubeDownloadProcess.HasExited)
                             {
                                 string consoleLine = reader.ReadLine();
+                                logger.Info(consoleLine);
+
                                 if (!string.IsNullOrWhiteSpace(consoleLine))
                                 {
                                     Match match = _extractDownloadProgress.Match(consoleLine);
@@ -178,7 +190,7 @@ namespace PlaylistDownloader
                 name,
                 "[\\W-]+",  /*Matches any nonword character. Equivalent to '[^A-Za-z0-9_]'*/
                 "-",
-                RegexOptions.IgnoreCase);
+                RegexOptions.IgnoreCase).Trim('-', ' ');
         }
     }
 }

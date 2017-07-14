@@ -6,3 +6,4 @@ PlaylistDownloader/Installer/Output/
 PlaylistDownloader/packages/
 dist/
 *.suo
+/.vs
