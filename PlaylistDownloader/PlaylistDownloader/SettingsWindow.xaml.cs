@@ -33,14 +33,17 @@ namespace PlaylistDownloader
 		private bool _isNumberOfResultsValid;
 		private bool _isQueryValid;
 		private const string INSTRUCTIONS = "Enter songs (one per line)";
-        public static readonly string SONGS_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
         private readonly bool _isDebugMode = bool.Parse(ConfigurationManager.AppSettings.Get("debug"));
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly RunSettings _runSettings;
+
 
         public SettingsWindow()
 		{
             Logger.Info("App started");
 			InitializeComponent();
+
+            _runSettings = InitializeRunSettings();
 
 			DataContext = this;
 
@@ -83,6 +86,30 @@ namespace PlaylistDownloader
             }
 
 		}
+
+        private RunSettings InitializeRunSettings()
+        {
+            string applicationFolder = Debugger.IsAttached
+                ? ".\\"
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader");
+            string youtubeDlPath = Path.Combine(applicationFolder, "youtube-dl.exe");
+            string ffmpegPath = Path.Combine(applicationFolder, "ffmpeg", "ffmpeg.exe");
+
+            var settings = new RunSettings
+            {
+                YoutubeDlPath = youtubeDlPath,
+                FfmpegPath = ffmpegPath
+            };
+
+            //  TODO 005: Get all settings from the configuration file
+            string isDebug = ConfigurationManager.AppSettings.Get("debug");
+            if (isDebug != null)
+            {
+                settings.IsDebug = bool.Parse(isDebug);
+            }
+
+            return settings;
+        }
 
         private void Process_Exited(object sender, EventArgs e)
         {
@@ -213,7 +240,7 @@ namespace PlaylistDownloader
 				.ToList().
 				ForEach(s => playlistItems.Add(new PlaylistItem(this) { Name = s }));
 
-		    new DownloadWindow(playlistItems, this).ShowDialog();
+		    new DownloadWindow(_runSettings, playlistItems).ShowDialog();
 		}
         
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -259,8 +286,8 @@ namespace PlaylistDownloader
 
 		private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
 		{
-			Directory.CreateDirectory(SONGS_FOLDER);
-			Process.Start(SONGS_FOLDER);
+			Directory.CreateDirectory(_runSettings.SongsFolder);
+			Process.Start(_runSettings.SongsFolder);
 		}
         
 	}

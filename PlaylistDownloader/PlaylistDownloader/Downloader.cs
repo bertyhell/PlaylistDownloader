@@ -16,7 +16,7 @@ namespace PlaylistDownloader
     {
 
         private readonly ICollection<PlaylistItem> _playlist;
-        private readonly bool _isDebugMode = bool.Parse(ConfigurationManager.AppSettings.Get("debug"));
+        private readonly RunSettings _runSettings;
 
         //[download]   0.9% of 3.45MiB at 553.57KiB/s ETA 00:06
         private readonly Regex _extractDownloadProgress = new Regex(@"\[download\][\s]*([0-9\.]+)%");
@@ -25,12 +25,14 @@ namespace PlaylistDownloader
         private CancellationTokenSource _cts;
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        public Downloader(ICollection<PlaylistItem> playlist)
+        public Downloader(RunSettings settings, ICollection<PlaylistItem> playlist)
         {
             _playlist = playlist;
             _totalSongs = _playlist.Count;
 
             _cts = new CancellationTokenSource();
+
+            _runSettings = settings;
         }
 
         protected override void OnDoWork(DoWorkEventArgs args)
@@ -53,7 +55,8 @@ namespace PlaylistDownloader
                     {
                         try
                         {
-                            DownloadPlaylistItem(item, po);
+                            po.CancellationToken.ThrowIfCancellationRequested();
+                            DownloadPlaylistItem(item);
                             //ConvertPlaylistItem(item, po);
                         }
                         catch (InvalidOperationException) { } //ignore exceptions when aborting download
@@ -84,9 +87,9 @@ namespace PlaylistDownloader
             catch (OperationCanceledException) { } //ignore exceptions caused by canceling paralel.foreach loop
         }
 
-        private void DownloadPlaylistItem(PlaylistItem item, ParallelOptions po)
+        public string DownloadPlaylistItem(PlaylistItem item)
         {
-            po.CancellationToken.ThrowIfCancellationRequested();
+            string filePath = null;
 
             item.DownloadProgress = 5;
             if (!string.IsNullOrWhiteSpace(item.Name))
@@ -94,8 +97,9 @@ namespace PlaylistDownloader
 
                 YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
                 item.FileName = MakeValidFileName(youtubeLink.Label);
+                filePath = Path.Combine(_runSettings.SongsFolder, item.FileName + ".mp3");
 
-                if (!File.Exists(SettingsWindow.SONGS_FOLDER + "/" + item.FileName + ".mp3"))
+                if (!File.Exists(filePath))
                 {
                     item.DownloadProgress = 10;
 
@@ -105,59 +109,23 @@ namespace PlaylistDownloader
                     }
                     else
                     {
-                        string youtubeDlPath = Debugger.IsAttached
-                            ? "./youtube-dl.exe"
-                            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader", "youtube-dl.exe");
 
-                        // TODO execute this after download in speparate Process 
-                        // "&& .\\ffmpeg\\ffmpeg.exe -i {0}.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 48k test.mp3"
-                        Process youtubeDownloadProcess = new Process
-                        {
-                            StartInfo =
-                            {
-                                FileName = youtubeDlPath,
-                                Arguments = string.Format(" --ffmpeg-location ./ffmpeg" +
-                                                          " --extract-audio" +
-                                                          " --audio-format mp3" +
-                                                          " --output \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, SettingsWindow.SONGS_FOLDER),
-                                CreateNoWindow = !_isDebugMode,
-                                WindowStyle = _isDebugMode ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true,
-                                UseShellExecute = false
-                            }
-                        };
+                        // Download videoand extract the mp3 file
+                        Process youtubeDownloadProcess = StartProcess(
+                            _runSettings.YoutubeDlPath,
+                            string.Format(" --ffmpeg-location \"{3}\"" +
+                                          " --extract-audio" +
+                                          " --audio-format mp3" +
+                                          " --output \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, _runSettings.SongsFolder, _runSettings.FfmpegPath));
 
-                        youtubeDownloadProcess.ErrorDataReceived += Process_ErrorDataReceived; ;
-                        youtubeDownloadProcess.Start();
+                        Thread.Sleep(1000);
 
-                        //extract progress from process
-                        using (StreamReader reader = youtubeDownloadProcess.StandardOutput)
-                        {
-                            while (!youtubeDownloadProcess.HasExited)
-                            {
-                                string consoleLine = reader.ReadLine();
-                                logger.Info(consoleLine);
-
-                                if (!string.IsNullOrWhiteSpace(consoleLine))
-                                {
-                                    Match match = _extractDownloadProgress.Match(consoleLine);
-                                    if (match.Length > 0 && match.Groups.Count >= 2)
-                                    {
-                                        double downloadProgress;
-                                        if (double.TryParse(match.Groups[1].Value, out downloadProgress))
-                                        {
-                                            item.DownloadProgress = (int)(10 + downloadProgress / 100 * 50);
-                                        }
-                                    }
-                                }
-                                if (CancellationPending)
-                                {
-                                    logger.Info("Canceling youtube downloader because of user.");
-                                    youtubeDownloadProcess.Close();
-                                }
-                            }
-                        }
+                        // Normalize audio file after the youtube-dl process has exited
+                        StartProcess(_runSettings.FfmpegPath, string.Format(" -i \"{0}\"" +
+                                                               " -af loudnorm=I=-16:TP=-1.5:LRA=11" +
+                                                               " -ar 48k" +
+                                                               " -y" +
+                                                               " \"{0}\"", filePath));
 
                         Thread.Sleep(1000);
                     }
@@ -167,6 +135,69 @@ namespace PlaylistDownloader
             item.DownloadProgress = 100;
             _progress++;
             OnProgressChanged(new ProgressChangedEventArgs(_progress * 100 / _totalSongs, null));
+
+            return filePath;
+        }
+
+        private Process StartProcess(string executablePath, string arguments)
+        {
+            Process process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = executablePath,
+                    Arguments = arguments,
+                    CreateNoWindow = !_runSettings.IsDebug,
+                    WindowStyle = _runSettings.IsDebug ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                }
+            };
+
+            //process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => Console.WriteLine("event error: " + e.Data);
+            //process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => Console.WriteLine("event output: " + e.Data);
+            process.Start();
+
+            using (StreamReader errorReader = process.StandardError)
+            using (StreamReader outputReader = process.StandardOutput)
+            {
+                while (!process.HasExited || !outputReader.EndOfStream || !errorReader.EndOfStream)
+                {
+                    if (!outputReader.EndOfStream)
+                    {
+                        string consoleLine = outputReader.ReadLine();
+                        Debug.WriteLine(consoleLine);
+                        logger.Info(consoleLine);
+                    }
+
+                    if (!errorReader.EndOfStream)
+                    {
+                        string consoleLine = errorReader.ReadLine();
+                        Debug.WriteLine("Error: " + consoleLine);
+                        logger.Error(consoleLine);
+                    }
+
+                    //if (!string.IsNullOrWhiteSpace(consoleLine))
+                    //{
+                    //    Match match = _extractDownloadProgress.Match(consoleLine);
+                    //    if (match.Length > 0 && match.Groups.Count >= 2)
+                    //    {
+                    //        if (double.TryParse(match.Groups[1].Value, out double downloadProgress))
+                    //        {
+                    //            item.DownloadProgress = (int)(startPercentage + downloadProgress / 100 * endPercentage);
+                    //        }
+                    //    }
+                    //}
+                    //if (CancellationPending)
+                    //{
+                    //    logger.Info("Canceling process because of user: " + executablePath);
+                    //    process.Close();
+                    //}
+                }
+            }
+
+            return process;
         }
 
         internal void Abort()
@@ -177,11 +208,6 @@ namespace PlaylistDownloader
                 _cts = null;
             }
             CancelAsync();
-        }
-
-        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            logger.Error(e.Data);
         }
 
         private static string MakeValidFileName(string name)

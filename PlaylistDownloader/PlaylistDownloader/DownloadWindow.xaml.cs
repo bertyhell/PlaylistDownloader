@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using PlaylistDownloader.Annotations;
 using System;
+using System.Configuration;
 
 //TODO 070 wait for cancel to complete before re-enabling download button
 
@@ -26,18 +27,18 @@ namespace PlaylistDownloader
         private bool _isIndeterminate;
         private Downloader _downloader;
         private string _abortButtonLabel;
-        private readonly SettingsWindow _settingsWindow;
+        private RunSettings _runSettings;
 
         private const string ABORT_LABEL = "Abort";
         private const string BACK_LABEL = "Back";
 
-        public DownloadWindow(List<PlaylistItem> playlistItems, SettingsWindow settingsWindow)
+        public DownloadWindow(RunSettings runSettings, List<PlaylistItem> playlistItems)
         {
             InitializeComponent();
 
+            _runSettings = runSettings;
             DataContext = this;
-
-            _settingsWindow = settingsWindow;
+            
             AbortButtonLabel = ABORT_LABEL;
             IsIndeterminate = false;
 
@@ -52,7 +53,8 @@ namespace PlaylistDownloader
 
         public void StartDownload()
         {
-            _downloader = new Downloader(PlayListItems)
+
+            _downloader = new Downloader(_runSettings, PlayListItems)
             {
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true
@@ -128,8 +130,8 @@ namespace PlaylistDownloader
 
         private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
         {
-            Directory.CreateDirectory(SettingsWindow.SONGS_FOLDER);
-            Process.Start(SettingsWindow.SONGS_FOLDER);
+            Directory.CreateDirectory(_runSettings.SongsFolder);
+            Process.Start(_runSettings.SongsFolder);
         }
 
         private void PlaylistItemDoubleClick(object sender, MouseButtonEventArgs e)
@@ -137,7 +139,7 @@ namespace PlaylistDownloader
             if (SelectedPlaylistItem != null &&
                 SelectedPlaylistItem.DownloadProgress == 100)
             {
-                string filePath = Path.GetFullPath(SettingsWindow.SONGS_FOLDER + "/" + SelectedPlaylistItem.FileName + ".mp3");
+                string filePath = Path.GetFullPath(Path.Combine(_runSettings.SongsFolder, SelectedPlaylistItem.FileName + ".mp3"));
                 if (File.Exists(filePath))
                 {
                     Process.Start(filePath);

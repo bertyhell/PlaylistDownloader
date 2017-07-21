@@ -18,8 +18,7 @@ namespace PlaylistDownloader
         public static IEnumerable<YoutubeLink> GetYoutubeLinks(string query, int numberOfResults = 1)
         {
             List<YoutubeLink> links = new List<YoutubeLink>();
-
-            string url = null;
+            
             if (query.StartsWith("http"))
             {
                 //  Get title

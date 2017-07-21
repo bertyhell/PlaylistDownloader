@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaylistDownloader", "PlaylistDownloader\PlaylistDownloader.csproj", "{E6F3673A-5982-4CF3-A751-8D004415B369}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilentUpdater", "SilentUpdater\SilentUpdater.csproj", "{95EE76E5-8C7B-4BE4-8127-9515C3EF6B72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaylistDownloader.UnitTests", "PlaylistDownloader.UnitTests\PlaylistDownloader.UnitTests.csproj", "{CE2ACA8E-01B2-483E-9D86-C06ACA0EEE65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{95EE76E5-8C7B-4BE4-8127-9515C3EF6B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95EE76E5-8C7B-4BE4-8127-9515C3EF6B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95EE76E5-8C7B-4BE4-8127-9515C3EF6B72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE2ACA8E-01B2-483E-9D86-C06ACA0EEE65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE2ACA8E-01B2-483E-9D86-C06ACA0EEE65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE2ACA8E-01B2-483E-9D86-C06ACA0EEE65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE2ACA8E-01B2-483E-9D86-C06ACA0EEE65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,5 @@
-PlaylistDownloader/PlaylistDownloader/obj/
-PlaylistDownloader/PlaylistDownloader/bin/
-PlaylistDownloader/SilentUpdater/obj/
-PlaylistDownloader/SilentUpdater/bin/
+PlaylistDownloader/*/obj/
+PlaylistDownloader/*/bin/
 PlaylistDownloader/Installer/Output/
 PlaylistDownloader/packages/
 dist/
