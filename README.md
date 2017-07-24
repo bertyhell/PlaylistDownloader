@@ -9,6 +9,16 @@ Download your whole playlist with one click of a button (textfile with title to 
 ![main window screenshot](img/screenshot1.png)
 ![main window screenshot](img/screenshot2.png)
 
+Development
+===========
+
+This program is written using visual studio 2017
+
+To run the test project you need this extension:
+https://marketplace.visualstudio.com/items?itemName=NUnitDevelopers.NUnit3TestAdapter
+
+Then use the "Test Explorer" window to run the tests
+
 ChangeLog
 =========
 

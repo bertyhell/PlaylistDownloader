@@ -53,9 +53,7 @@ namespace PlaylistDownloader
 
             // Update youtube-dl.exe
             Logger.Info("Updating youtube downloader");
-            var youtubeDlExePath =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "PlaylistDownloader", "youtube-dl.exe");
+            var youtubeDlExePath = _runSettings.YoutubeDlPath;
             if (File.Exists(youtubeDlExePath))
             {
                 Process process = new Process
@@ -91,7 +89,7 @@ namespace PlaylistDownloader
         {
             string applicationFolder = Debugger.IsAttached
                 ? ".\\"
-                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader");
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "PlaylistDownloader");
             string youtubeDlPath = Path.Combine(applicationFolder, "youtube-dl.exe");
             string ffmpegPath = Path.Combine(applicationFolder, "ffmpeg", "ffmpeg.exe");
 
@@ -106,6 +104,7 @@ namespace PlaylistDownloader
             if (isDebug != null)
             {
                 settings.IsDebug = bool.Parse(isDebug);
+                settings.NormalizedSuffix = "-normalized";
             }
 
             return settings;
@@ -240,7 +239,8 @@ namespace PlaylistDownloader
 				.ToList().
 				ForEach(s => playlistItems.Add(new PlaylistItem(this) { Name = s }));
 
-		    new DownloadWindow(_runSettings, playlistItems).ShowDialog();
+		    new DownloadWindow(_runSettings, playlistItems, this).Show();
+            Hide();
 		}
         
 		public event PropertyChangedEventHandler PropertyChanged;

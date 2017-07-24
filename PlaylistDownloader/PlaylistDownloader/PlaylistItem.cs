@@ -15,6 +15,7 @@ namespace PlaylistDownloader
 		{
 			_settingsWindow = settingsWindow;
 			DownloadProgress = 0;
+            Duration = 0;
 			DownloadStatusColor = new SolidColorBrush(Colors.LightGreen);
 		}
 
@@ -37,7 +38,9 @@ namespace PlaylistDownloader
 			}
 		}
 
-		public SolidColorBrush DownloadStatusColor
+        public double Duration { get; set; }
+
+        public SolidColorBrush DownloadStatusColor
 		{
 			get { return _downloadStatusColor; }
 			set

@@ -28,15 +28,17 @@ namespace PlaylistDownloader
         private Downloader _downloader;
         private string _abortButtonLabel;
         private RunSettings _runSettings;
+        private SettingsWindow _settingsWindow;
 
         private const string ABORT_LABEL = "Abort";
         private const string BACK_LABEL = "Back";
 
-        public DownloadWindow(RunSettings runSettings, List<PlaylistItem> playlistItems)
+        public DownloadWindow(RunSettings runSettings, List<PlaylistItem> playlistItems, SettingsWindow settingsWindow)
         {
             InitializeComponent();
 
             _runSettings = runSettings;
+            _settingsWindow = settingsWindow;
             DataContext = this;
             
             AbortButtonLabel = ABORT_LABEL;
@@ -150,6 +152,7 @@ namespace PlaylistDownloader
         protected override void OnClosing(CancelEventArgs e)
         {
             _downloader.Abort();
+            _settingsWindow.Show();
 
             base.OnClosing(e);
         }

@@ -12,6 +12,7 @@ namespace PlaylistDownloader
         public RunSettings()
         {
             IsDebug = true;
+            NormalizedSuffix = "";
             SongsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
         }
 
@@ -19,5 +20,6 @@ namespace PlaylistDownloader
         public string YoutubeDlPath { get; set; }
         public string FfmpegPath { get; set; }
         public string SongsFolder { get; set; }
+        public string NormalizedSuffix { get; set; }
     }
 }
