@@ -20,6 +20,8 @@ namespace PlaylistDownloader
         //TODO show more detailed progress for download and conversion by using process output
         //TODO add setting to change download folder
         //TODO if youtube-dl.exe file can't be found in the programdata folder try to find it in the current folder
+        //TODO make sure all non alpha numeric chars are removed
+        //TODO make sure if name cleanup results in no alpha numeric chars that there is a default name that doesn't collide with other empty names
 
         private string _playList;
         private bool _isIndeterminate;
