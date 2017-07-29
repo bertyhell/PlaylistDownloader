@@ -30,9 +30,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "..\PlaylistDownloader\bin\Debug\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "ffmpeg/*,youtube-dl.exe,*.log"
-Source: "..\PlaylistDownloader\bin\Debug\youtube-dl.exe"; DestDir: "{userappdata}/PlaylistDownloader"; Flags: ignoreversion recursesubdirs createallsubdirs 
-Source: "..\PlaylistDownloader\bin\Debug\ffmpeg\*"; DestDir: "{userappdata}/PlaylistDownloader/ffmpeg"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\PlaylistDownloader\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "ffmpeg/*,youtube-dl.exe,*.log,*.vshost.*,*.pdb,youtube-dl.exe.new,youtube-dl-updater.bat"
+Source: "..\PlaylistDownloader\bin\Release\youtube-dl.exe"; DestDir: "{userappdata}/PlaylistDownloader"; Flags: ignoreversion recursesubdirs createallsubdirs 
+Source: "..\PlaylistDownloader\bin\Release\ffmpeg\*"; DestDir: "{userappdata}/PlaylistDownloader/ffmpeg"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
