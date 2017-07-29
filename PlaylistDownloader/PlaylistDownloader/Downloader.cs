@@ -87,7 +87,7 @@ namespace PlaylistDownloader
 
         public async Task<string> DownloadPlaylistItem(PlaylistItem item)
         {
-            string filePath = null;
+            string filePathWithoutExtension = null;
 
             item.DownloadProgress = 5;
             if (!string.IsNullOrWhiteSpace(item.Name))
@@ -95,9 +95,9 @@ namespace PlaylistDownloader
 
                 YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
                 item.FileName = MakeValidFileName(youtubeLink.Label);
-                filePath = Path.Combine(_runSettings.SongsFolder, item.FileName + ".mp3");
+                filePathWithoutExtension = Path.Combine(_runSettings.SongsFolder, item.FileName);
 
-                if (!File.Exists(filePath))
+                if (!File.Exists(filePathWithoutExtension + ".mp3"))
                 {
                     item.DownloadProgress = 10;
 
@@ -107,14 +107,14 @@ namespace PlaylistDownloader
                     }
                     else
                     {
-
                         // Download videoand extract the mp3 file
                         await StartProcess(
                             _runSettings.YoutubeDlPath,
-                            string.Format(" --ffmpeg-location \"{3}\"" +
+                            string.Format(" --ffmpeg-location \"{0}\"" +
                                           " --extract-audio" +
                                           " --audio-format mp3" +
-                                          " --output \"{2}\\{0}.%(ext)s\" {1}", item.FileName, youtubeLink.Url, _runSettings.SongsFolder, _runSettings.FfmpegPath),
+                                          " --output \"{1}\"" +
+                                          " {2}", _runSettings.FfmpegPath, filePathWithoutExtension + "-raw.mp3", youtubeLink.Url),
                             item,
                             ParseYoutubeDlProgress);
 
@@ -124,9 +124,12 @@ namespace PlaylistDownloader
                                           " -af loudnorm=I=-16:TP=-1.5:LRA=11" +
                                           " -ar 48k" +
                                           " -y" +
-                                          " \"{1}\"", filePath, new Regex("\\.mp3$").Replace(filePath, _runSettings.NormalizedSuffix + ".mp3")),
+                                          " \"{1}\"", filePathWithoutExtension + "-raw.mp3", filePathWithoutExtension + _runSettings.NormalizedSuffix + ".mp3"),
                             item,
                             ParseYoutubeDlProgress);
+
+                        // Delete the non normalized file after completion if not in debug mode
+                        File.Delete(Path.Combine(_runSettings.SongsFolder, item.FileName + "-raw.mp3"));
                     }
                 }
             }
@@ -135,7 +138,7 @@ namespace PlaylistDownloader
             _progress++;
             OnProgressChanged(new ProgressChangedEventArgs(_progress * 100 / _totalSongs, null));
 
-            return filePath;
+            return filePathWithoutExtension;
         }
 
         private void ParseYoutubeDlProgress(string consoleLine, PlaylistItem item)
