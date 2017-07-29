@@ -6,8 +6,7 @@ Download your whole playlist with one click of a button
 [![Download](img/download-installer.png)](https://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloader.exe)
 [![Download](img/download-zip.png)](https://github.com/bertyhell/PlaylistDownloader/raw/master/PlaylistDownloader.zip)
 
-![main window screenshot](img/screenshot1.png)
-![main window screenshot](img/screenshot2.png)
+![program in operation screencast gif](img/screencast_opt.gif)
 
 Features
 ========
