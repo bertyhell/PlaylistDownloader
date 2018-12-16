@@ -86,6 +86,11 @@ namespace PlaylistDownloader
                 ? ".\\"
                 : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "PlaylistDownloader");
 
+            if (!Directory.Exists(applicationFolder))
+            {
+                applicationFolder = ".\\";
+            }
+
             if (!File.Exists(Properties.Settings.Default.YoutubeDlPath)) {
                 // set default path
                 Properties.Settings.Default.YoutubeDlPath = Path.Combine(applicationFolder, "youtube-dl.exe");
