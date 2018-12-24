@@ -5,3 +5,5 @@ PlaylistDownloader/packages/
 dist/
 *.suo
 /.vs
+PlaylistDownloaderElectron/
+PlaylistDownloader/.vs
