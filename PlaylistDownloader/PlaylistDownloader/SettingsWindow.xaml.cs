@@ -9,6 +9,8 @@ using PlaylistDownloader.Annotations;
 using System;
 using System.Configuration;
 using NLog;
+using Microsoft.Win32;
+using Ookii.Dialogs.Wpf;
 
 namespace PlaylistDownloader
 {
@@ -369,36 +371,18 @@ namespace PlaylistDownloader
             }
         }
 
-        private void ChooseOutputPath_Click(object sender, RoutedEventArgs e)
+        private void ChooseOutputPathClick(object sender, RoutedEventArgs e)
         {
-            var forceChooseDialog = false;
-            if (sender != null)
+            var dialog = new VistaFolderBrowserDialog
             {
-                // user clicked choose button
-                forceChooseDialog = true;
-            }
-
-            bool changed = false;
-
-            while (!Directory.Exists(Properties.Settings.Default.OutputPath) || forceChooseDialog)
+                Description = "Select output folder",
+                UseDescriptionForTitle = true
+            };
+            bool? showDialog = dialog.ShowDialog(this);
+            if (showDialog != null && (bool)showDialog)
             {
-                forceChooseDialog = false;
-                var ret = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Please enter full path to output folder", "Choose output folder", Properties.Settings.Default.OutputPath);
-                if (string.IsNullOrEmpty(ret))
-                {
-                    return;
-                }
-                else
-                {
-                    Properties.Settings.Default.OutputPath = ret;
-                    Directory.CreateDirectory(Properties.Settings.Default.OutputPath);
-                    changed = true;
-                }
-            }
-
-            if (changed)
-            {
+                Properties.Settings.Default.OutputPath = dialog.SelectedPath;
+                Directory.CreateDirectory(Properties.Settings.Default.OutputPath);
                 Properties.Settings.Default.Save();
             }
         }
