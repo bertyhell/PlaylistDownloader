@@ -9,8 +9,9 @@ using PlaylistDownloader.Annotations;
 using System;
 using System.Configuration;
 using NLog;
-using Microsoft.Win32;
+
 using Ookii.Dialogs.Wpf;
+using Microsoft.Win32;
 
 namespace PlaylistDownloader
 {
@@ -84,37 +85,60 @@ namespace PlaylistDownloader
 
         private RunSettings InitializeRunSettings()
         {
-            string applicationFolder = Debugger.IsAttached
-                ? ".\\"
-                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "PlaylistDownloader");
 
-            if (!Directory.Exists(applicationFolder))
+            string applicationFolder =
+                //Debugger.IsAttached
+                //? ".\\"
+                //: 
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PlaylistDownloader");
+
+            // Find youtube-dl.exe
+            string[] youtubeDownloadPaths = new string[] {
+                Path.Combine(applicationFolder, "youtube-dl.exe"),
+                Path.Combine(".", "youtube-dl.exe")
+            };
+            if (!File.Exists(Properties.Settings.Default.YoutubeDlPath))
             {
-                applicationFolder = ".\\";
+                if (File.Exists(youtubeDownloadPaths[0]))
+                {
+                    Properties.Settings.Default.YoutubeDlPath = youtubeDownloadPaths[0];
+                }
+                else if (File.Exists(youtubeDownloadPaths[1]))
+                {
+                    Properties.Settings.Default.YoutubeDlPath = youtubeDownloadPaths[1];
+                }
+                else
+                {
+                    // If it still doesn't find it => should never happen since either
+                    // * the installer should install it in that directory
+                    // * or the zip should contain it in the same folder as the playlist downloader exe
+                    ChooseYoutubePathClick(null, null);
+                }
             }
 
-            if (!File.Exists(Properties.Settings.Default.YoutubeDlPath)) {
-                // set default path
-                Properties.Settings.Default.YoutubeDlPath = Path.Combine(applicationFolder, "youtube-dl.exe");
-            }
-
-            ChooseYoutubePath_Click(null, null);
-
+            // Find ffmpeg.exe
+            string[] ffmpegPaths = new string[] {
+                Path.Combine(applicationFolder, "ffmpeg", "ffmpeg.exe"),
+                Path.Combine(".", "ffmpeg", "ffmpeg.exe")
+            };
             if (!File.Exists(Properties.Settings.Default.FfmpegPath))
             {
-                // set default path
-                Properties.Settings.Default.FfmpegPath = Path.Combine(applicationFolder, "ffmpeg", "ffmpeg.exe");
+                if (File.Exists(ffmpegPaths[0]))
+                {
+                    Properties.Settings.Default.FfmpegPath = ffmpegPaths[0];
+                }
+                else if (File.Exists(ffmpegPaths[1]))
+                {
+                    Properties.Settings.Default.FfmpegPath = ffmpegPaths[1];
+                }
+                else
+                {
+                    // If it still doesn't find it => should never happen since either
+                    // * the installer should install it in that directory
+                    // * or the zip should contain it in the same folder as the playlist downloader exe
+                    ChooseFfmpegPathClick(null, null);
+                }
             }
-
-            ChooseFfmpegPath_Click(null, null);
-
-            if (!Directory.Exists(Properties.Settings.Default.OutputPath))
-            {
-                // set default path
-                Properties.Settings.Default.OutputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
-            }
-
-            
 
             var settings = new RunSettings
             {
@@ -122,8 +146,6 @@ namespace PlaylistDownloader
                 FfmpegPath = Properties.Settings.Default.FfmpegPath,
                 SongsFolder = Properties.Settings.Default.OutputPath
             };
-
-            //  TODO 005: Get all settings from the configuration file
 
             settings.IsDebug = _isDebugMode;
             if (_isDebugMode)
@@ -305,69 +327,49 @@ namespace PlaylistDownloader
             Process.Start(_runSettings.SongsFolder);
         }
 
-        private void ChooseYoutubePath_Click(object sender, RoutedEventArgs e)
+        private void ChooseYoutubePathClick(object sender, RoutedEventArgs e)
         {
-            var forceChooseDialog = false;
-            if (sender != null)
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                // user clicked choose button
-                forceChooseDialog = true;
-            }
-
-            bool changed = false;
-
-            while (!File.Exists(Properties.Settings.Default.YoutubeDlPath) || forceChooseDialog)
+                Filter = "Executable|*.exe",
+                Title = "Select youtube-dl.exe"
+            };
+            bool? userClickedOk = openFileDialog.ShowDialog();
+            if (userClickedOk == true)
             {
-                forceChooseDialog = false;
-                var ret = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Please enter full path to youtube-dl.exe", "Cannot find Youtube-dl", Properties.Settings.Default.YoutubeDlPath);
-                if (string.IsNullOrEmpty(ret))
-                {
-                    return;
-                }
-                else
-                {
-                    Properties.Settings.Default.YoutubeDlPath = ret;
-                    changed = true;
-                }
-            }
-
-            if (changed)
-            {
+                Properties.Settings.Default.YoutubeDlPath = openFileDialog.FileName;
                 Properties.Settings.Default.Save();
+            }
+            else
+            {
+                MessageBoxResult result = MessageBox.Show("Without youtube-dl.exe this application cannot function",
+                                          "Error",
+                                          MessageBoxButton.OK,
+                                          MessageBoxImage.Error);
+                Application.Current.Shutdown();
             }
         }
 
-        private void ChooseFfmpegPath_Click(object sender, RoutedEventArgs e)
+        private void ChooseFfmpegPathClick(object sender, RoutedEventArgs e)
         {
-            var forceChooseDialog = false;
-            if (sender != null)
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                // user clicked choose button
-                forceChooseDialog = true;
-            }
-
-            bool changed = false;
-
-            while (!File.Exists(Properties.Settings.Default.FfmpegPath) || forceChooseDialog)
+                Filter = "Executable|*.exe",
+                Title = "Select ffmpeg.exe"
+            };
+            bool? userClickedOk = openFileDialog.ShowDialog();
+            if (userClickedOk == true)
             {
-                forceChooseDialog = false;
-                var ret = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Please enter full path to ffmpeg.exe", "Cannot find ffmpeg", Properties.Settings.Default.FfmpegPath);
-                if (string.IsNullOrEmpty(ret))
-                {
-                    return;
-                }
-                else
-                {
-                    Properties.Settings.Default.FfmpegPath = ret;
-                    changed = true;
-                }
-            }
-
-            if (changed)
-            {
+                Properties.Settings.Default.FfmpegPath = openFileDialog.FileName;
                 Properties.Settings.Default.Save();
+            }
+            else
+            {
+                MessageBoxResult result = MessageBox.Show("Without ffmpeg.exe this application cannot function",
+                                          "Error",
+                                          MessageBoxButton.OK,
+                                          MessageBoxImage.Error);
+                Application.Current.Shutdown();
             }
         }
 
@@ -376,13 +378,13 @@ namespace PlaylistDownloader
             var dialog = new VistaFolderBrowserDialog
             {
                 Description = "Select output folder",
-                UseDescriptionForTitle = true
+                UseDescriptionForTitle = true,
+                SelectedPath = Properties.Settings.Default.OutputPath
             };
             bool? showDialog = dialog.ShowDialog(this);
             if (showDialog != null && (bool)showDialog)
             {
                 Properties.Settings.Default.OutputPath = dialog.SelectedPath;
-                Directory.CreateDirectory(Properties.Settings.Default.OutputPath);
                 Properties.Settings.Default.Save();
             }
         }
