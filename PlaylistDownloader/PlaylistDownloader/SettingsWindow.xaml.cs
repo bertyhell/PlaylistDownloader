@@ -48,7 +48,7 @@ namespace PlaylistDownloader
 
             PlayList = INSTRUCTIONS;
             IsIndeterminate = false;
-            NumberOfResultsInput = "20";
+            NumberOfResultsInput = Properties.Settings.Default.NumberOfResults.ToString();
 
             // Update youtube-dl.exe
             Logger.Info("Updating youtube downloader");
@@ -85,13 +85,40 @@ namespace PlaylistDownloader
             string applicationFolder = Debugger.IsAttached
                 ? ".\\"
                 : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "PlaylistDownloader");
-            string youtubeDlPath = Path.Combine(applicationFolder, "youtube-dl.exe");
-            string ffmpegPath = Path.Combine(applicationFolder, "ffmpeg", "ffmpeg.exe");
+
+            if (!Directory.Exists(applicationFolder))
+            {
+                applicationFolder = ".\\";
+            }
+
+            if (!File.Exists(Properties.Settings.Default.YoutubeDlPath)) {
+                // set default path
+                Properties.Settings.Default.YoutubeDlPath = Path.Combine(applicationFolder, "youtube-dl.exe");
+            }
+
+            ChooseYoutubePath_Click(null, null);
+
+            if (!File.Exists(Properties.Settings.Default.FfmpegPath))
+            {
+                // set default path
+                Properties.Settings.Default.FfmpegPath = Path.Combine(applicationFolder, "ffmpeg", "ffmpeg.exe");
+            }
+
+            ChooseFfmpegPath_Click(null, null);
+
+            if (!Directory.Exists(Properties.Settings.Default.OutputPath))
+            {
+                // set default path
+                Properties.Settings.Default.OutputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
+            }
+
+            
 
             var settings = new RunSettings
             {
-                YoutubeDlPath = youtubeDlPath,
-                FfmpegPath = ffmpegPath
+                YoutubeDlPath = Properties.Settings.Default.YoutubeDlPath,
+                FfmpegPath = Properties.Settings.Default.FfmpegPath,
+                SongsFolder = Properties.Settings.Default.OutputPath
             };
 
             //  TODO 005: Get all settings from the configuration file
@@ -170,6 +197,12 @@ namespace PlaylistDownloader
                 if (value == _numberOfResultsInput) return;
                 _numberOfResultsInput = value;
                 IsNumberOfResultsValid = int.TryParse(_numberOfResultsInput, out _numberOfResults);
+                if (IsNumberOfResultsValid)
+                {
+                    Properties.Settings.Default.NumberOfResults = _numberOfResults;
+                    Properties.Settings.Default.Save();
+                }
+
                 OnPropertyChanged("NumberOfResultsInput");
             }
         }
@@ -188,7 +221,7 @@ namespace PlaylistDownloader
 
         public bool IsDownloadButtonEnabled
         {
-            get { return !PlayList.Equals(INSTRUCTIONS) && !string.IsNullOrWhiteSpace(PlayList); }
+            get { return !string.IsNullOrWhiteSpace(PlayList) && !PlayList.Equals(INSTRUCTIONS); }
         }
 
         public string DownloadButtonError
@@ -270,5 +303,104 @@ namespace PlaylistDownloader
             Process.Start(_runSettings.SongsFolder);
         }
 
+        private void ChooseYoutubePath_Click(object sender, RoutedEventArgs e)
+        {
+            var forceChooseDialog = false;
+            if (sender != null)
+            {
+                // user clicked choose button
+                forceChooseDialog = true;
+            }
+
+            bool changed = false;
+
+            while (!File.Exists(Properties.Settings.Default.YoutubeDlPath) || forceChooseDialog)
+            {
+                forceChooseDialog = false;
+                var ret = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Please enter full path to youtube-dl.exe", "Cannot find Youtube-dl", Properties.Settings.Default.YoutubeDlPath);
+                if (string.IsNullOrEmpty(ret))
+                {
+                    return;
+                }
+                else
+                {
+                    Properties.Settings.Default.YoutubeDlPath = ret;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void ChooseFfmpegPath_Click(object sender, RoutedEventArgs e)
+        {
+            var forceChooseDialog = false;
+            if (sender != null)
+            {
+                // user clicked choose button
+                forceChooseDialog = true;
+            }
+
+            bool changed = false;
+
+            while (!File.Exists(Properties.Settings.Default.FfmpegPath) || forceChooseDialog)
+            {
+                forceChooseDialog = false;
+                var ret = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Please enter full path to ffmpeg.exe", "Cannot find ffmpeg", Properties.Settings.Default.FfmpegPath);
+                if (string.IsNullOrEmpty(ret))
+                {
+                    return;
+                }
+                else
+                {
+                    Properties.Settings.Default.FfmpegPath = ret;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void ChooseOutputPath_Click(object sender, RoutedEventArgs e)
+        {
+            var forceChooseDialog = false;
+            if (sender != null)
+            {
+                // user clicked choose button
+                forceChooseDialog = true;
+            }
+
+            bool changed = false;
+
+            while (!Directory.Exists(Properties.Settings.Default.OutputPath) || forceChooseDialog)
+            {
+                forceChooseDialog = false;
+                var ret = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Please enter full path to output folder", "Choose output folder", Properties.Settings.Default.OutputPath);
+                if (string.IsNullOrEmpty(ret))
+                {
+                    return;
+                }
+                else
+                {
+                    Properties.Settings.Default.OutputPath = ret;
+                    Directory.CreateDirectory(Properties.Settings.Default.OutputPath);
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                Properties.Settings.Default.Save();
+            }
+        }
     }
 }

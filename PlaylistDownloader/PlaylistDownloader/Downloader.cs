@@ -87,7 +87,8 @@ namespace PlaylistDownloader
 
         public async Task<string> DownloadPlaylistItem(PlaylistItem item)
         {
-            string filePathWithoutExtension = null;
+            string destinationFilePathWithoutExtension = null;
+            string tempFilePathWithoutExtension = null;
 
             item.DownloadProgress = 5;
             if (!string.IsNullOrWhiteSpace(item.Name))
@@ -95,9 +96,12 @@ namespace PlaylistDownloader
 
                 YoutubeLink youtubeLink = YoutubeSearcher.GetYoutubeLinks(item.Name).FirstOrDefault();
                 item.FileName = MakeValidFileName(youtubeLink.Label);
-                filePathWithoutExtension = Path.Combine(_runSettings.SongsFolder, item.FileName);
+                item.FileName = string.Concat(youtubeLink.Label.Split(Path.GetInvalidFileNameChars())).Trim().Replace('–', '-');
+                var workingFolder = Path.GetTempPath();
+                tempFilePathWithoutExtension = Path.Combine(Path.GetTempPath(), item.FileName);
+                destinationFilePathWithoutExtension = Path.Combine(_runSettings.SongsFolder, item.FileName);
 
-                if (!File.Exists(filePathWithoutExtension + ".mp3"))
+                if (!File.Exists(destinationFilePathWithoutExtension + ".mp3"))
                 {
                     item.DownloadProgress = 10;
 
@@ -111,26 +115,36 @@ namespace PlaylistDownloader
                         await StartProcess(
                             _runSettings.YoutubeDlPath,
                             string.Format(" --ffmpeg-location \"{0}\"" +
+                                          " --format bestaudio[ext=mp3]/best" +
+                                          " --audio-quality 0" +
+                                          " --no-part" +
                                           " --extract-audio" +
                                           " --audio-format mp3" +
                                           " --output \"{1}\"" +
-                                          " {2}", _runSettings.FfmpegPath, filePathWithoutExtension + "-raw.mp3", youtubeLink.Url),
+                                          " {2}", _runSettings.FfmpegPath, tempFilePathWithoutExtension + "-raw.%(ext)s", youtubeLink.Url),
                             item,
                             ParseYoutubeDlProgress);
+                        // -o "c:\Users\Julian\Music\PlaylistDownloader\\%(title)s.%(ext)s"
 
                         // Normalize audio file after the youtube-dl process has exited
                         await StartProcess(_runSettings.FfmpegPath,
                             string.Format(" -i \"{0}\"" +
                                           " -af loudnorm=I=-16:TP=-1.5:LRA=11" +
-                                          " -ar 48k" +
+                                          //" -ar 48k" +
                                           " -y" +
-                                          " \"{1}\"", filePathWithoutExtension + "-raw.mp3", filePathWithoutExtension + _runSettings.NormalizedSuffix + ".mp3"),
+                                          " \"{1}\"", tempFilePathWithoutExtension + "-raw.mp3", tempFilePathWithoutExtension + _runSettings.NormalizedSuffix + ".mp3"),
                             item,
                             ParseYoutubeDlProgress);
+
+                        // move to destination
+                        File.Move(tempFilePathWithoutExtension + _runSettings.NormalizedSuffix + ".mp3",
+                            destinationFilePathWithoutExtension + _runSettings.NormalizedSuffix + ".mp3");
 
                         // Delete the non normalized file after completion if not in debug mode
                         File.Delete(Path.Combine(_runSettings.SongsFolder, item.FileName + "-raw.mp3"));
                     }
+
+
                 }
             }
 
@@ -138,7 +152,9 @@ namespace PlaylistDownloader
             _progress++;
             OnProgressChanged(new ProgressChangedEventArgs(_progress * 100 / _totalSongs, null));
 
-            return filePathWithoutExtension;
+            
+
+            return destinationFilePathWithoutExtension;
         }
 
         private void ParseYoutubeDlProgress(string consoleLine, PlaylistItem item)
@@ -148,10 +164,14 @@ namespace PlaylistDownloader
             Match match = extractDownloadProgress.Match(consoleLine);
             if (match.Length > 0 && match.Groups.Count >= 2)
             {
-                if (double.TryParse(match.Groups[1].Value, out double downloadProgress))
+                if (double.TryParse(match.Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double downloadProgress))
                 {
                     logger.Info("[download + convert progress] " + downloadProgress);
-                    item.DownloadProgress = (int)(10 + downloadProgress / 100 * 60);
+                    if (downloadProgress > 100 || _progress > 100)
+                    {
+                        Debugger.Break();
+                    }
+                    item.DownloadProgress = (int)(10.0 + downloadProgress / 100 * 60);
                     OnProgressChanged(new ProgressChangedEventArgs(_progress * 100 / _totalSongs, null));
                 }
             }
@@ -206,6 +226,7 @@ namespace PlaylistDownloader
                 },
                 EnableRaisingEvents = true
             };
+            // --audio-quality 5 --extract-audio --audio-format mp3  -o "c:\Users\Julian\Music\PlaylistDownloader\\%(title)s.%(ext)s" https://www.youtube.com/watch?v=mDuElaL1dU0
 
             process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
             {
@@ -271,7 +292,7 @@ namespace PlaylistDownloader
         {
             return Regex.Replace(
                 name,
-                "[\\W-]+",  /*Matches any nonword character. Equivalent to '[^A-Za-z0-9_]'*/
+                "[^A-Za-z0-9_ -]+",  /*Matches any nonword character. Equivalent to '[^A-Za-z0-9_]'*/
                 "-",
                 RegexOptions.IgnoreCase).Trim('-', ' ').ToLower();
         }
