@@ -23,6 +23,9 @@ Development
 
 This program is written using visual studio 2017
 
+
+Tests
+=====
 To run the test project you need this extension:
 https://marketplace.visualstudio.com/items?itemName=NUnitDevelopers.NUnit3TestAdapter
 
@@ -31,11 +34,11 @@ Then use the "Test Explorer" window to run the tests
 ChangeLog
 =========
 
-##Version 1.3 and up
+## Version 1.3 and up
 
 https://github.com/bertyhell/PlaylistDownloader/releases
 
-##Version 1.2
+## Version 1.2
 
 - More finegrained progress for download and conversion process
 - Correctly aborts processes when user clicks abort
@@ -44,7 +47,7 @@ https://github.com/bertyhell/PlaylistDownloader/releases
 - Added percentage to every playlist item
 - added auto updater
 
-##Version 1.1
+## Version 1.1
 
 - Made Download and convert process multi threaded
 - Speed increasement of 3.5 times.
