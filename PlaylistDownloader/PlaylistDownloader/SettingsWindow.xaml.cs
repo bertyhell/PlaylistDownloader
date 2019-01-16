@@ -140,11 +140,17 @@ namespace PlaylistDownloader
                 }
             }
 
+            var outputPath = Properties.Settings.Default.OutputPath;
+            if (outputPath == null || outputPath == "")
+            {
+                outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "PlaylistDownloader");
+            }
+
             var settings = new RunSettings
             {
                 YoutubeDlPath = Properties.Settings.Default.YoutubeDlPath,
                 FfmpegPath = Properties.Settings.Default.FfmpegPath,
-                SongsFolder = Properties.Settings.Default.OutputPath
+                SongsFolder = outputPath
             };
 
             settings.IsDebug = _isDebugMode;
@@ -323,7 +329,11 @@ namespace PlaylistDownloader
 
         private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
         {
-            Directory.CreateDirectory(_runSettings.SongsFolder);
+
+            if (!Directory.Exists(_runSettings.SongsFolder))
+            {
+                Directory.CreateDirectory(_runSettings.SongsFolder);
+            }
             Process.Start(_runSettings.SongsFolder);
         }
 

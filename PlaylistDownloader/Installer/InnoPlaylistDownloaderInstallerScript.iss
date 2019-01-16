@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{B0011CEC-2AE2-40CF-9136-C2BD13928896}
 AppName=PlaylistDownloader
-AppVersion=1.8
-AppVerName=PlaylistDownloader 1.8
+AppVersion=1.9.3
+AppVerName=PlaylistDownloader 1.9.3
 AppPublisher=Taxrebel productions
 AppPublisherURL=https://github.com/bertyhell/PlaylistDownloader
 AppSupportURL=https://github.com/bertyhell/PlaylistDownloader

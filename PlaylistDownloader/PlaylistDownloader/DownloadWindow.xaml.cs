@@ -132,7 +132,10 @@ namespace PlaylistDownloader
 
         private void ButtonOpenFolderClick(object sender, RoutedEventArgs e)
         {
-            Directory.CreateDirectory(_runSettings.SongsFolder);
+            if (!Directory.Exists(_runSettings.SongsFolder))
+            {
+                Directory.CreateDirectory(_runSettings.SongsFolder);
+            }
             Process.Start(_runSettings.SongsFolder);
         }
 
