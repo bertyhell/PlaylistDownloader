@@ -55,7 +55,6 @@ namespace PlaylistDownloader
                         {
                             po.CancellationToken.ThrowIfCancellationRequested();
                             await DownloadPlaylistItem(item);
-                            //ConvertPlaylistItem(item, po);
                         }
                         catch (InvalidOperationException) { } //ignore exceptions when aborting download
                         catch (Win32Exception) { } //ignore process exception if killed during process exiting

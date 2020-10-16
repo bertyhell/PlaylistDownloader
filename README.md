@@ -1,5 +1,5 @@
-PlaylistDownloader 1.9.3
-========================
+PlaylistDownloader 1.10.0
+=========================
 
 Download your whole playlist with one click of a button
 
@@ -21,7 +21,7 @@ Features
 Development
 ===========
 
-This program is written using visual studio 2017
+This program is written using visual studio 2019
 
 
 Tests
