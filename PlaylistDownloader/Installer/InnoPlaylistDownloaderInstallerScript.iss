@@ -18,7 +18,7 @@ DisableDirPage=yes
 DefaultGroupName=PlaylistDownloader
 DisableProgramGroupPage=yes
 OutputBaseFilename=setup
-SetupIconFile=..\PlaylistDownloader\icon.ico
+SetupIconFile=..\PlaylistDownloader\img\icon.ico
 UninstallDisplayIcon={app}\PlaylistDownloader.exe
 Compression=lzma
 SolidCompression=yes
@@ -29,8 +29,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
+[InstallDelete]
+Type: filesandordirs; Name: {app}\*
+
 [Files]
-Source: "..\PlaylistDownloader\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "ffmpeg/*,youtube-dl.exe,*.log,*.vshost.*,*.pdb,youtube-dl.exe.new,youtube-dl-updater.bat"
+Source: "..\PlaylistDownloader\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "\ffmpeg,\youtube-dl.exe"
 Source: "..\PlaylistDownloader\bin\Release\youtube-dl.exe"; DestDir: "{userappdata}/PlaylistDownloader"; Flags: ignoreversion recursesubdirs createallsubdirs 
 Source: "..\PlaylistDownloader\bin\Release\ffmpeg\*"; DestDir: "{userappdata}/PlaylistDownloader/ffmpeg"; Flags: ignoreversion recursesubdirs createallsubdirs
 
