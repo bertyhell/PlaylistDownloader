@@ -1,4 +1,4 @@
-PlaylistDownloader 1.11.0
+PlaylistDownloader 1.12.1
 =========================
 
 Download your whole playlist with one click of a button

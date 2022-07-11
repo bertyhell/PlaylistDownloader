@@ -9,7 +9,7 @@ Unicode True
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
 
-Name "PlaylistDownloader 1.12.0"
+Name "PlaylistDownloader 1.12.1"
 BrandingText ""
 OutFile "C:\Users\Bert\Documents\repos\PlaylistDownloader\PlaylistDownloader\Installer\Output\PlaylistDownloader.exe"
 InstallDir "$PROGRAMFILES\PlaylistDownloader"
@@ -23,6 +23,13 @@ FunctionEnd
 
 Section -InstallDelete
   RMDir /r "$INSTDIR"
+SectionEnd
+
+Section "Visual C++ Runtime"
+  SetOutPath "$INSTDIR"
+  File ".\vcredist_x86.exe"
+  ExecWait "$INSTDIR\vcredist_x86.exe /install /passive"
+  Delete "$INSTDIR\vcredist_x86.exe"
 SectionEnd
 
 Section -Files
